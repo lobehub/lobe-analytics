@@ -2,21 +2,21 @@
 
 <img height="160" src="https://registry.npmmirror.com/@lobehub/assets-logo/1.0.0/files/assets/logo-3d.webp">
 
-<h1>LobeHub Library Template</h1>
+<h1>Lobe Analytics</h1>
 
-A modern, well-structured TypeScript library template for building high-quality npm packages. This template provides a solid foundation with comprehensive tooling, testing setup, and development workflow.
+A modern, type-safe analytics library for tracking user events across multiple providers. Built with TypeScript and designed for flexibility and ease of use.
 
-[![][npm-release-shield]][npm-release-link]
-[![][github-releasedate-shield]][github-releasedate-link]
-[![][github-action-test-shield]][github-action-test-link]
-[![][github-action-release-shield]][github-action-release-link]<br/>
-[![][github-contributors-shield]][github-contributors-link]
-[![][github-forks-shield]][github-forks-link]
-[![][github-stars-shield]][github-stars-link]
-[![][github-issues-shield]][github-issues-link]
-[![][github-license-shield]][github-license-link]
+\[!\[]\[npm-release-shield]]\[npm-release-link]
+\[!\[]\[github-releasedate-shield]]\[github-releasedate-link]
+\[!\[]\[github-action-test-shield]]\[github-action-test-link]
+\[!\[]\[github-action-release-shield]]\[github-action-release-link]<br/>
+\[!\[]\[github-contributors-shield]]\[github-contributors-link]
+\[!\[]\[github-forks-shield]]\[github-forks-link]
+\[!\[]\[github-stars-shield]]\[github-stars-link]
+\[!\[]\[github-issues-shield]]\[github-issues-link]
+\[!\[]\[github-license-shield]]\[github-license-link]
 
-[Changelog](./CHANGELOG.md) · [Report Bug][github-issues-link] · [Request Feature][github-issues-link]
+[Changelog](./CHANGELOG.md) · \[Report Bug]\[github-issues-link] · \[Request Feature]\[github-issues-link]
 
 ![](https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png)
 
@@ -29,22 +29,19 @@ A modern, well-structured TypeScript library template for building high-quality 
 
 - [✨ Features](#-features)
 - [📦 Installation](#-installation)
+- [Import Structure](#import-structure)
 - [🚀 Quick Start](#-quick-start)
   - [Basic Usage](#basic-usage)
-  - [Advanced Configuration](#advanced-configuration)
-  - [Utility Functions](#utility-functions)
+  - [React Integration](#react-integration)
+  - [PostHog Features](#posthog-features)
 - [📖 API Reference](#-api-reference)
-  - [`LobeLib` Class](#lobelib-class)
+  - [Core Functions](#core-functions)
+  - [React Hooks](#react-hooks)
   - [Types](#types)
-  - [Utility Functions](#utility-functions-1)
 - [🛠️ Development](#️-development)
-  - [Available Scripts](#available-scripts)
   - [Project Structure](#project-structure)
-- [🤝 Contributing](#-contributing)
-- [🔗 Links](#-links)
-  - [More Products](#more-products)
-  - [Design Resources](#design-resources)
-  - [Development Resources](#development-resources)
+- [Examples](#examples)
+- [License](#license)
 
 ####
 
@@ -52,27 +49,41 @@ A modern, well-structured TypeScript library template for building high-quality 
 
 ## ✨ Features
 
-- 🎯 **TypeScript First** - Built with TypeScript for better developer experience
-- 📦 **Modern Build** - Uses tsup for fast, modern bundling
-- 🧪 **Testing Ready** - Configured with Vitest for unit testing
-- 📝 **Linting & Formatting** - ESLint, Prettier, and commit hooks setup
-- 🔄 **CI/CD Ready** - GitHub Actions for testing and publishing
-- 📚 **Documentation** - JSDoc comments and comprehensive README
-- 🎨 **Modern Tooling** - Latest development tools and best practices
+- 🎯 **Type-safe** - Full TypeScript support with predefined events
+- 🔌 **Multi-provider** - Built-in PostHog support, extensible for other providers
+- ⚛️ **React integration** - Built-in hooks for React applications
+- 🎛️ **Easy configuration** - Simple setup with environment variables
+- 🪶 **Lightweight** - Minimal dependencies and optimized bundle size
+- 🔧 **Developer-friendly** - Comprehensive error handling and debugging
 
 ## 📦 Installation
 
-To install `lobe-lib-template`, run the following command:
-
-[![][bun-shield]][bun-link]
+To install `lobe-analytics`, run the following command:
 
 ```bash
-$ bun add lobe-lib-template
+npm install lobe-analytics
+```
+
+This library includes PostHog analytics provider out of the box. For React integration:
+
+```bash
+npm install react # if not already installed
+```
+
+## Import Structure
+
+The library provides separate entry points for core functionality and React integration:
+
+```typescript
+// Core analytics functionality
+import { AnalyticsManager, createAnalytics } from 'lobe-analytics';
+// React hooks (separate import)
+import { useAnalytics, useEventTracking } from 'lobe-analytics/react';
 ```
 
 <div align="right">
 
-[![][back-to-top]](#readme-top)
+[!\[\]\[back-to-top\]](#readme-top)
 
 </div>
 
@@ -81,269 +92,226 @@ $ bun add lobe-lib-template
 ### Basic Usage
 
 ```typescript
-import { LobeLib } from 'lobe-lib-template';
+import { createAnalytics } from 'lobe-analytics';
 
-// Create a new instance
-const lib = new LobeLib();
-
-// Get library information
-const info = lib.getInfo();
-console.log(info); // { name: 'lobe-lib-template', version: '1.0.0', formattedVersion: 'v1.0.0' }
-
-// Process data asynchronously
-const result = await lib.processData('Hello World');
-console.log(result); // 'Hello World'
-
-// Validate data
-const validation = lib.validateData('');
-console.log(validation); // { isValid: false, errors: ['Data cannot be empty'] }
-```
-
-### Advanced Configuration
-
-```typescript
-import { LibConfig, LobeLib } from 'lobe-lib-template';
-
-const config: LibConfig = {
-  name: 'my-custom-lib',
-  version: '2.0.0',
-  debug: true,
-};
-
-const lib = new LobeLib({
-  config,
-  timeout: 3000,
+// Configure analytics
+const analytics = createAnalytics({
+  debug: process.env.NODE_ENV === 'development',
+  providers: {
+    posthog: {
+      enabled: !!process.env.POSTHOG_KEY,
+      key: process.env.POSTHOG_KEY!,
+      host: process.env.POSTHOG_HOST, // optional
+    },
+  },
 });
 
-// Update configuration
-lib.updateConfig({ debug: false });
+// Initialize
+await analytics.initialize();
 
-// Get current configuration
-const currentConfig = lib.getConfig();
+// Track events
+await analytics.trackEvent('user:signup', {
+  method: 'email',
+  source: 'landing_page',
+});
+
+// Identify users
+await analytics.identify('user_123', {
+  email: 'user@example.com',
+  plan: 'pro',
+});
 ```
 
-### Utility Functions
+### React Integration
 
 ```typescript
-import { createDefaultConfig, formatVersion, validateConfig } from 'lobe-lib-template';
+import React from 'react';
+import { createAnalytics } from 'lobe-analytics';
+import { useAnalytics, useEventTracking } from 'lobe-analytics/react';
 
-// Format version string
-const formatted = formatVersion('1.2.3'); // 'v1.2.3'
+// Create analytics instance
+const analytics = createAnalytics({
+  providers: {
+    posthog: {
+      enabled: true,
+      key: process.env.REACT_APP_POSTHOG_KEY!,
+    },
+  },
+});
 
-// Validate configuration
-const isValid = validateConfig({ name: 'test', version: '1.0.0' }); // true
+// Initialize in app startup
+await analytics.initialize();
 
-// Create default configuration
-const defaultConfig = createDefaultConfig();
+function MyComponent() {
+  const { trackEvent } = useAnalytics(analytics);
+  const { trackButtonClick } = useEventTracking(analytics);
+
+  const handleSignup = () => {
+    trackEvent('user:signup', { method: 'oauth' });
+  };
+
+  const handleButtonClick = () => {
+    trackButtonClick('cta-button', { page: 'home' });
+  };
+
+  return (
+    <div>
+      <button onClick={handleSignup}>Sign Up</button>
+      <button onClick={handleButtonClick}>Learn More</button>
+    </div>
+  );
+}
+```
+
+### PostHog Features
+
+```typescript
+import { PostHogAnalyticsProvider } from 'lobe-analytics';
+
+// Access PostHog-specific features
+const provider = analytics.getProvider('posthog') as PostHogAnalyticsProvider;
+
+// Check feature flags
+const isNewFeatureEnabled = provider.isFeatureEnabled('new-feature');
+
+if (isNewFeatureEnabled) {
+  // Show new feature
+}
 ```
 
 <div align="right">
 
-[![][back-to-top]](#readme-top)
+[!\[\]\[back-to-top\]](#readme-top)
 
 </div>
 
 ## 📖 API Reference
 
-### `LobeLib` Class
+### Core Functions
 
-The main class that provides the core functionality.
+#### `createAnalytics(config: AnalyticsConfig): AnalyticsManager`
 
-#### Constructor
+Creates a configured analytics manager.
 
-```typescript
-new LobeLib(options?: LibOptions)
-```
+#### `AnalyticsManager`
 
-**Parameters:**
+Main class for managing analytics providers.
 
-- `options` (optional): Configuration options
-  - `config`: Custom library configuration
-  - `timeout`: Timeout for async operations (default: 5000ms)
+**Methods:**
 
-#### Methods
+- `initialize(): Promise<void>` - Initialize all providers
+- `track(event: AnalyticsEvent): Promise<void>` - Track custom event
+- `trackEvent<K>(eventName: K, properties): Promise<void>` - Track predefined event
+- `identify(userId: string, properties?): Promise<void>` - Identify user
+- `trackPageView(page: string, properties?): Promise<void>` - Track page view
+- `reset(): Promise<void>` - Reset user identity
 
-##### `getConfig(): LibConfig`
+### React Hooks
 
-Returns a copy of the current configuration.
+#### `useAnalytics(manager: AnalyticsManager)`
 
-##### `updateConfig(newConfig: Partial<LibConfig>): void`
+Provides core analytics functionality.
 
-Updates the library configuration with new values.
+#### `useEventTracking(manager: AnalyticsManager)`
 
-##### `getInfo(): { name: string; version: string; formattedVersion: string }`
-
-Returns library information including formatted version.
-
-##### `processData<T>(data: T): Promise<T>`
-
-Processes data asynchronously with optional timeout.
-
-##### `validateData<T>(data: T): { isValid: boolean; errors: string[] }`
-
-Validates input data and returns validation results.
+Provides convenient event tracking methods.
 
 ### Types
 
-#### `LibConfig`
+#### `AnalyticsConfig`
 
 ```typescript
-interface LibConfig {
-  name: string;
-  version: string;
+interface AnalyticsConfig {
+  debug?: boolean;
+  providers: {
+    posthog?: PostHogConfig;
+  };
+}
+```
+
+#### `PostHogConfig`
+
+```typescript
+interface PostHogConfig {
+  enabled: boolean;
+  key: string;
+  host?: string;
   debug?: boolean;
 }
 ```
 
-#### `LibOptions`
+#### `PredefinedEvents`
 
 ```typescript
-interface LibOptions {
-  config?: LibConfig;
-  timeout?: number;
+interface PredefinedEvents {
+  'user:signup': { method: 'email' | 'oauth' | 'phone'; source?: string };
+  'user:login': { method: 'email' | 'oauth' | 'phone' };
+  'ui:button_click': { button_name: string; page?: string };
+  'form:submit': { form_name: string; success: boolean };
+  // ... more events
 }
 ```
 
-### Utility Functions
-
-#### `formatVersion(version: string): string`
-
-Formats a version string by adding 'v' prefix.
-
-#### `validateConfig(config: LibConfig): boolean`
-
-Validates that a configuration object has required fields.
-
-#### `createDefaultConfig(): LibConfig`
-
-Creates a default configuration object.
-
 <div align="right">
 
-[![][back-to-top]](#readme-top)
+[!\[\]\[back-to-top\]](#readme-top)
 
 </div>
 
 ## 🛠️ Development
 
-You can use Github Codespaces for online development:
-
-[![][github-codespace-shield]][github-codespace-link]
-
-Or clone it for local development:
-
-[![][bun-shield]][bun-link]
-
 ```bash
-$ git clone https://github.com/lobehub/lobe-lib-template.git
-$ cd lobe-lib-template
-$ bun install
-$ bun dev
+# Clone the repository
+git clone https://github.com/lobehub/lobe-analytics.git
+cd lobe-analytics
+
+# Install dependencies
+npm install
+
+# Start development
+npm run dev
+
+# Build the library
+npm run build
+
+# Run tests
+npm test
+
+# Run examples
+npm run example
 ```
-
-### Available Scripts
-
-- `bun dev` - Start development mode with watch
-- `bun build` - Build the library for production
-- `bun test` - Run tests
-- `bun test:coverage` - Run tests with coverage
-- `bun lint` - Lint and fix code
-- `bun type-check` - Type check TypeScript code
-- `bun ci` - Run all CI checks
 
 ### Project Structure
 
 ```
-lobe-lib-template/
+lobe-analytics/
 ├── src/
-│   └── index.ts          # Main library entry point
-├── dist/                 # Built files (generated)
-├── tests/                # Test files
-├── tsup.config.ts        # Build configuration
-├── vitest.config.ts      # Test configuration
-├── tsconfig.json         # TypeScript configuration
-└── package.json          # Package configuration
+│   ├── base.ts           # Base analytics provider
+│   ├── manager.ts        # Analytics manager
+│   ├── config.ts         # Configuration factory
+│   ├── hooks.ts          # React hooks
+│   ├── types.ts          # TypeScript definitions
+│   ├── providers/        # Analytics providers
+│   │   └── posthog.ts    # PostHog implementation
+│   └── index.ts          # Main exports
+├── examples/             # Usage examples
+└── dist/                 # Built files (generated)
 ```
 
 <div align="right">
 
-[![][back-to-top]](#readme-top)
+[!\[\]\[back-to-top\]](#readme-top)
 
 </div>
 
-## 🤝 Contributing
+## Examples
 
-Contributions of all types are more than welcome, if you are interested in contributing code, feel free to check out our GitHub [Issues][github-issues-link] to get stuck in to show us what you're made of.
+See the `examples/` directory for complete usage examples:
 
-[![][pr-welcome-shield]][pr-welcome-link]
+- `examples/library-usage.ts` - Complete usage guide with best practices
+- `examples/basic-usage.ts` - Simple implementation example
+- `examples/posthog-usage.ts` - PostHog specific features
 
-[![][github-contrib-shield]][github-contrib-link]
+## License
 
-<div align="right">
-
-[![][back-to-top]](#readme-top)
-
-</div>
-
-## 🔗 Links
-
-### More Products
-
-- **[🤯 Lobe Chat](https://github.com/lobehub/lobe-chat)** - An open-source, extensible (Function Calling), high-performance chatbot framework. It supports one-click free deployment of your private ChatGPT/LLM web application.
-- **[🅰️ Lobe Theme](https://github.com/lobehub/sd-webui-lobe-theme)** - The modern theme for stable diffusion webui, exquisite interface design, highly customizable UI, and efficiency boosting features.
-- **[🧸 Lobe Vidol](https://github.com/lobehub/lobe-vidol)** - Experience the magic of virtual idol creation with Lobe Vidol, enjoy the elegance of our Exquisite UI Design, dance along using MMD Dance Support, and engage in Smooth Conversations.
-
-### Design Resources
-
-- **[🍭 Lobe UI](https://ui.lobehub.com)** - An open-source UI component library for building AIGC web apps.
-- **[🥨 Lobe Icons](https://lobehub.com/icons)** - Popular AI / LLM Model Brand SVG Logo and Icon Collection.
-- **[📊 Lobe Charts](https://charts.lobehub.com)** - React modern charts components built on recharts
-
-### Development Resources
-
-- **[🎤 Lobe TTS](https://tts.lobehub.com)** - A high-quality & reliable TTS/STT library for Server and Browser
-- **[🌏 Lobe i18n](https://github.com/lobehub/lobe-cli-toolbox/blob/master/packages/lobe-i18n)** - Automation ai tool for the i18n (internationalization) translation process.
-
-[More Resources](https://lobehub.com/resources)
-
-<div align="right">
-
-[![][back-to-top]](#readme-top)
-
-</div>
-
----
-
-#### 📝 License
-
-Copyright © 2025 [LobeHub][profile-link]. <br />
-This project is [MIT](./LICENSE) licensed.
-
-[back-to-top]: https://img.shields.io/badge/-BACK_TO_TOP-black?style=flat-square
-[bun-link]: https://bun.sh
-[bun-shield]: https://img.shields.io/badge/-speedup%20with%20bun-black?logo=bun&style=for-the-badge
-[github-action-release-link]: https://github.com/lobehub/lobe-lib-template/actions/workflows/release.yml
-[github-action-release-shield]: https://img.shields.io/github/actions/workflow/status/lobehub/lobe-lib-template/release.yml?label=release&labelColor=black&logo=githubactions&logoColor=white&style=flat-square
-[github-action-test-link]: https://github.com/lobehub/lobe-lib-template/actions/workflows/test.yml
-[github-action-test-shield]: https://img.shields.io/github/actions/workflow/status/lobehub/lobe-lib-template/test.yml?label=test&labelColor=black&logo=githubactions&logoColor=white&style=flat-square
-[github-codespace-link]: https://codespaces.new/lobehub/lobe-lib-template
-[github-codespace-shield]: https://github.com/codespaces/badge.svg
-[github-contrib-link]: https://github.com/lobehub/lobe-lib-template/graphs/contributors
-[github-contrib-shield]: https://contrib.rocks/image?repo=lobehub%2Flobe-lib-template
-[github-contributors-link]: https://github.com/lobehub/lobe-lib-template/graphs/contributors
-[github-contributors-shield]: https://img.shields.io/github/contributors/lobehub/lobe-lib-template?color=c4f042&labelColor=black&style=flat-square
-[github-forks-link]: https://github.com/lobehub/lobe-lib-template/network/members
-[github-forks-shield]: https://img.shields.io/github/forks/lobehub/lobe-lib-template?color=8ae8ff&labelColor=black&style=flat-square
-[github-issues-link]: https://github.com/lobehub/lobe-lib-template/issues
-[github-issues-shield]: https://img.shields.io/github/issues/lobehub/lobe-lib-template?color=ff80eb&labelColor=black&style=flat-square
-[github-license-link]: https://github.com/lobehub/lobe-lib-template/blob/master/LICENSE
-[github-license-shield]: https://img.shields.io/github/license/lobehub/lobe-lib-template?color=white&labelColor=black&style=flat-square
-[github-releasedate-link]: https://github.com/lobehub/lobe-lib-template/releases
-[github-releasedate-shield]: https://img.shields.io/github/release-date/lobehub/lobe-lib-template?labelColor=black&style=flat-square
-[github-stars-link]: https://github.com/lobehub/lobe-lib-template/network/stargazers
-[github-stars-shield]: https://img.shields.io/github/stars/lobehub/lobe-lib-template?color=ffcb47&labelColor=black&style=flat-square
-[npm-release-link]: https://www.npmjs.com/package/lobe-lib-template
-[npm-release-shield]: https://img.shields.io/npm/v/lobe-lib-template?color=369eff&labelColor=black&logo=npm&logoColor=white&style=flat-square
-[pr-welcome-link]: https://github.com/lobehub/lobe-lib-template/pulls
-[pr-welcome-shield]: https://img.shields.io/badge/%F0%9F%A4%AF%20PR%20WELCOME-%E2%86%92-ffcb47?labelColor=black&style=for-the-badge
-[profile-link]: https://github.com/lobehub
+MIT

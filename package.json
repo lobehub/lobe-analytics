@@ -1,18 +1,30 @@
 {
-  "name": "lobe-lib-template",
+  "name": "lobe-analytics",
   "version": "1.0.1",
   "private": true,
-  "description": "A modern, well-structured TypeScript library template for building high-quality npm packages",
-  "homepage": "https://github.com/lobehub/lobe-lib-template",
+  "description": "A modern, type-safe analytics library for tracking user events across multiple providers, built by LobeHub",
+  "homepage": "https://github.com/lobehub/lobe-analytics",
   "bugs": {
-    "url": "https://github.com/lobehub/lobe-lib-template/issues/new/choose"
+    "url": "https://github.com/lobehub/lobe-analytics/issues/new/choose"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/lobehub/lobe-lib-template.git"
+    "url": "https://github.com/lobehub/lobe-analytics.git"
   },
   "license": "MIT",
   "author": "LobeHub <i@lobehub.com>",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    },
+    "./react": {
+      "types": "./dist/react/index.d.mts",
+      "import": "./dist/react/index.mjs",
+      "require": "./dist/react/index.cjs"
+    }
+  },
   "main": "dist/index.mjs",
   "module": "dist/index.mjs",
   "types": "dist/index.d.mts",
@@ -58,15 +70,20 @@
       "eslint --fix"
     ]
   },
+  "dependencies": {
+    "posthog-js": "^1.103.0"
+  },
   "devDependencies": {
     "@commitlint/cli": "^19.8.1",
     "@lobehub/lint": "^1.26.2",
+    "@types/react": "^18.2.0",
     "dotenv": "^16.5.0",
     "dpdm": "^3.14.0",
     "eslint": "^8.57.1",
     "husky": "^9.1.7",
     "lint-staged": "^16.1.2",
     "prettier": "^3.5.3",
+    "react": "^18.2.0",
     "remark": "^15.0.1",
     "remark-cli": "^12.0.1",
     "semantic-release": "^21.1.2",
@@ -74,6 +91,14 @@
     "tsx": "^4.20.3",
     "typescript": "^5.8.3",
     "vitest": "^3.2.4"
+  },
+  "peerDependencies": {
+    "react": ">=16.8.0"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    }
   },
   "packageManager": "pnpm@10.11.0",
   "publishConfig": {
