@@ -12,7 +12,9 @@
     "jsx": "react-jsx",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["src/*"],
+      "@lobehub/analytics": ["src"],
+      "@lobehub/analytics/*": ["src/*"]
     }
   },
   "exclude": ["node_modules", "dist"],

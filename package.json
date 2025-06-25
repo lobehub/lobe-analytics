@@ -1,7 +1,6 @@
 {
-  "name": "lobe-analytics",
+  "name": "@lobehub/analytics",
   "version": "1.0.1",
-  "private": true,
   "description": "A modern, type-safe analytics library for tracking user events across multiple providers, built by LobeHub",
   "homepage": "https://github.com/lobehub/lobe-analytics",
   "bugs": {
@@ -43,6 +42,7 @@
     "postpack": "clean-package restore",
     "prepare": "husky",
     "prepublishOnly": "npm run build",
+    "prettier": "prettier -c --write --no-error-on-unmatched-pattern",
     "release": "semantic-release",
     "test": "vitest",
     "test:coverage": "vitest run --coverage  --passWithNoTests",

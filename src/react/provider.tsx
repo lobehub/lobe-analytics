@@ -1,7 +1,8 @@
 'use client';
 
-import React, { type ReactNode, createContext, useContext, useEffect, useState } from 'react';
+import React, { type ReactNode, createContext, useContext, useLayoutEffect, useState } from 'react';
 
+import { setGlobalAnalytics } from '../global';
 import type { AnalyticsManager } from '../manager';
 
 /**
@@ -29,10 +30,14 @@ interface AnalyticsProviderProps {
   children: ReactNode;
   /** 配置好的 Analytics 实例 */
   client: AnalyticsManager;
+  /** 全局实例名称，用于全局访问（默认: '__default__'） */
+  globalName?: string;
   /** 初始化失败时的回调 */
   onInitializeError?: (error: Error) => void;
   /** 初始化成功时的回调 */
   onInitializeSuccess?: () => void;
+  /** 是否注册为全局实例（默认: true） */
+  registerGlobal?: boolean;
 }
 
 /**
@@ -42,7 +47,7 @@ interface AnalyticsProviderProps {
  *
  * @example
  * ```tsx
- * import { createAnalytics, AnalyticsProvider } from 'lobe-analytics';
+ * import { createAnalytics, AnalyticsProvider } from '@lobehub/analytics';
  *
  * const analytics = createAnalytics({
  *   debug: true,
@@ -68,14 +73,23 @@ export function AnalyticsProvider({
   client,
   children,
   autoInitialize = true,
+  globalName = '__default__',
   onInitializeError,
   onInitializeSuccess,
+  registerGlobal = true,
 }: AnalyticsProviderProps) {
   const [isInitialized, setIsInitialized] = useState(false);
   const [isInitializing, setIsInitializing] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
-  useEffect(() => {
+  // 注册为全局实例
+  useLayoutEffect(() => {
+    if (registerGlobal) {
+      setGlobalAnalytics(client, globalName);
+    }
+  }, [client, globalName, registerGlobal]);
+
+  useLayoutEffect(() => {
     if (!autoInitialize || isInitialized || isInitializing) {
       return;
     }
@@ -138,15 +152,54 @@ function useAnalyticsContext(): AnalyticsContextValue {
 }
 
 /**
- * 获取 Analytics 实例
+ * 获取 Analytics 实例（安全版本，不抛出错误）
  *
- * @returns Analytics 实例
- * @throws {Error} 如果在 AnalyticsProvider 外使用或实例未初始化
+ * @returns Analytics 实例或 null，以及状态信息
  *
  * @example
  * ```tsx
  * function MyComponent() {
- *   const analytics = useAnalytics();
+ *   const { analytics, isReady, error } = useAnalytics();
+ *
+ *   if (!isReady) {
+ *     return <div>Analytics not ready</div>;
+ *   }
+ *
+ *   const handleClick = () => {
+ *     analytics?.track({ name: 'button_click' });
+ *   };
+ *
+ *   return <button onClick={handleClick}>Click me</button>;
+ * }
+ * ```
+ */
+export function useAnalytics() {
+  const { analytics, isInitialized, isInitializing, error } = useAnalyticsContext();
+
+  return {
+    /** Analytics 实例（仅在就绪时可用） */
+    analytics: isInitialized && !error ? analytics : null,
+    /** 是否发生错误 */
+    error,
+    /** 是否已初始化 */
+    isInitialized,
+    /** 是否正在初始化 */
+    isInitializing,
+    /** 是否就绪（已初始化且无错误） */
+    isReady: isInitialized && !error && analytics !== null,
+  };
+}
+
+/**
+ * 获取 Analytics 实例（严格版本，抛出错误）
+ *
+ * @returns Analytics 实例
+ * @throws {Error} 如果在 AnalyticsProvider 外使用或实例未就绪
+ *
+ * @example
+ * ```tsx
+ * function MyComponent() {
+ *   const analytics = useAnalyticsStrict();
  *
  *   const handleClick = () => {
  *     analytics.track({ name: 'button_click' });
@@ -156,27 +209,27 @@ function useAnalyticsContext(): AnalyticsContextValue {
  * }
  * ```
  */
-export function useAnalytics(): AnalyticsManager {
+export function useAnalyticsStrict(): AnalyticsManager {
   const { analytics, isInitialized, isInitializing, error } = useAnalyticsContext();
 
   if (error) {
-    throw new Error(`[useAnalytics] Analytics initialization failed: ${error.message}`);
+    throw new Error(`[useAnalyticsStrict] Analytics initialization failed: ${error.message}`);
   }
 
   if (!isInitialized) {
     if (isInitializing) {
       throw new Error(
-        '[useAnalytics] Analytics is still initializing. Use useAnalyticsState to check status.',
+        '[useAnalyticsStrict] Analytics is still initializing. Use useAnalyticsState to check status.',
       );
     } else {
       throw new Error(
-        '[useAnalytics] Analytics not initialized. Set autoInitialize=true or call initialize manually.',
+        '[useAnalyticsStrict] Analytics not initialized. Set autoInitialize=true or call initialize manually.',
       );
     }
   }
 
   if (!analytics) {
-    throw new Error('[useAnalytics] Analytics instance is null');
+    throw new Error('[useAnalyticsStrict] Analytics instance is null');
   }
 
   return analytics;
@@ -214,6 +267,7 @@ export function useAnalyticsState() {
 /**
  * 获取 Analytics 实例（可选，不抛出错误）
  *
+ * @deprecated 请使用 `useAnalytics()` 代替，它现在提供相同的安全访问
  * @returns Analytics 实例或 null
  *
  * @example
@@ -230,11 +284,6 @@ export function useAnalyticsState() {
  * ```
  */
 export function useAnalyticsOptional(): AnalyticsManager | null {
-  const { analytics, isInitialized, error } = useAnalyticsContext();
-
-  if (error || !isInitialized || !analytics) {
-    return null;
-  }
-
+  const { analytics } = useAnalytics();
   return analytics;
 }

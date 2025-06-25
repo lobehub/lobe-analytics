@@ -11,6 +11,7 @@ function createUserAnalytics() {
 
   // User reads environment variables and configures
   const analytics = createAnalytics({
+    business: '',
     debug: process.env.NODE_ENV !== 'production',
     providers: {
       posthog: {
@@ -65,8 +66,8 @@ async function reactExample() {
 
   const code = `
 import React from 'react';
-import { createAnalytics } from 'lobe-analytics';
-import { useAnalytics, useEventTracking } from 'lobe-analytics/react';
+import { createAnalytics } from '@lobehub/analytics';
+import { useAnalytics, useEventTracking } from '@lobehub/analytics/react';
 
 // Create analytics instance
 const analytics = createAnalytics({
@@ -130,8 +131,8 @@ function designPrinciples() {
   console.log('  - Application integration');
   console.log('');
   console.log('📦 Import structure:');
-  console.log("  - Core: import { createAnalytics } from 'lobe-analytics'");
-  console.log("  - React: import { useAnalytics } from 'lobe-analytics/react'");
+  console.log("  - Core: import { createAnalytics } from '@lobehub/analytics'");
+  console.log("  - React: import { useAnalytics } from '@lobehub/analytics/react'");
 }
 
 // Run all examples

@@ -4,7 +4,7 @@
 
 <h1>Lobe Analytics</h1>
 
-A modern, type-safe analytics library for tracking user events across multiple providers. Built with TypeScript and designed for flexibility and ease of use.
+A modern, type-safe analytics library for tracking user events across multiple providers. Built with TypeScript and designed for flexibility, global instance management, and ease of use.
 
 \[!\[]\[npm-release-shield]]\[npm-release-link]
 \[!\[]\[github-releasedate-shield]]\[github-releasedate-link]
@@ -32,11 +32,13 @@ A modern, type-safe analytics library for tracking user events across multiple p
 - [Import Structure](#import-structure)
 - [🚀 Quick Start](#-quick-start)
   - [Basic Usage](#basic-usage)
+  - [Global Instance Management](#global-instance-management)
   - [React Integration](#react-integration)
-  - [PostHog Features](#posthog-features)
+  - [SPM (Source Page Medium) Auto-Prefixing](#spm-source-page-medium-auto-prefixing)
 - [📖 API Reference](#-api-reference)
   - [Core Functions](#core-functions)
-  - [React Hooks](#react-hooks)
+  - [Global Instance Management](#global-instance-management-1)
+  - [React Hooks & Provider](#react-hooks--provider)
   - [Types](#types)
 - [🛠️ Development](#️-development)
   - [Project Structure](#project-structure)
@@ -51,17 +53,20 @@ A modern, type-safe analytics library for tracking user events across multiple p
 
 - 🎯 **Type-safe** - Full TypeScript support with predefined events
 - 🔌 **Multi-provider** - Built-in PostHog support, extensible for other providers
-- ⚛️ **React integration** - Built-in hooks for React applications
-- 🎛️ **Easy configuration** - Simple setup with environment variables
+- 🌐 **Global Instance Management** - Singleton pattern and named global instances
+- 📊 **SPM Auto-Prefixing** - Automatic Source Page Medium tracking with business prefixes
+- ⚛️ **React integration** - Enhanced Provider with auto-registration and hooks
+- 🎛️ **Easy configuration** - Simple setup with business context
 - 🪶 **Lightweight** - Minimal dependencies and optimized bundle size
 - 🔧 **Developer-friendly** - Comprehensive error handling and debugging
+- 🧪 **Test-friendly** - Built-in reset and cleanup functions
 
 ## 📦 Installation
 
-To install `lobe-analytics`, run the following command:
+To install `@lobehub/analytics`, run the following command:
 
 ```bash
-npm install lobe-analytics
+npm install @lobehub/analytics
 ```
 
 This library includes PostHog analytics provider out of the box. For React integration:
@@ -76,9 +81,20 @@ The library provides separate entry points for core functionality and React inte
 
 ```typescript
 // Core analytics functionality
-import { AnalyticsManager, createAnalytics } from 'lobe-analytics';
+import { AnalyticsManager, createAnalytics } from '@lobehub/analytics';
+// Global instance management
+import {
+  createSingletonAnalytics,
+  getGlobalAnalytics,
+  getSingletonAnalytics,
+} from '@lobehub/analytics';
 // React hooks (separate import)
-import { useAnalytics, useEventTracking } from 'lobe-analytics/react';
+import {
+  AnalyticsProvider,
+  useAnalytics,
+  useAnalyticsStrict,
+  useEventTracking,
+} from '@lobehub/analytics/react';
 ```
 
 <div align="right">
@@ -92,10 +108,11 @@ import { useAnalytics, useEventTracking } from 'lobe-analytics/react';
 ### Basic Usage
 
 ```typescript
-import { createAnalytics } from 'lobe-analytics';
+import { createAnalytics } from '@lobehub/analytics';
 
-// Configure analytics
+// Configure analytics with business context
 const analytics = createAnalytics({
+  business: 'my-app', // Required: business name for SPM prefixing
   debug: process.env.NODE_ENV === 'development',
   providers: {
     posthog: {
@@ -109,10 +126,11 @@ const analytics = createAnalytics({
 // Initialize
 await analytics.initialize();
 
-// Track events
-await analytics.trackEvent('user:signup', {
+// Track events with automatic SPM prefixing
+await analytics.trackEvent('user_signup', {
   method: 'email',
   source: 'landing_page',
+  spm: 'homepage.cta', // Will become: 'my-app.homepage.cta'
 });
 
 // Identify users
@@ -122,15 +140,66 @@ await analytics.identify('user_123', {
 });
 ```
 
+### Global Instance Management
+
+**Singleton Pattern (Recommended for simple apps):**
+
+```typescript
+import { createSingletonAnalytics, getSingletonAnalytics } from '@lobehub/analytics';
+
+// Create singleton (usually in app initialization)
+const analytics = createSingletonAnalytics({
+  business: 'my-app',
+  providers: {
+    posthog: {
+      enabled: true,
+      key: process.env.POSTHOG_KEY!,
+    },
+  },
+});
+
+await analytics.initialize();
+
+// Access from anywhere in your application
+export function trackUserAction() {
+  const analytics = getSingletonAnalytics();
+  analytics.trackEvent('button_click', {
+    button_name: 'signup',
+    page: 'home',
+  });
+}
+```
+
+**Named Global Instances (For complex apps):**
+
+```typescript
+import { getGlobalAnalytics, setGlobalAnalytics } from '@lobehub/analytics';
+
+// Register multiple instances
+setGlobalAnalytics(mainAnalytics, 'main');
+setGlobalAnalytics(adminAnalytics, 'admin');
+
+// Use specific instances
+getGlobalAnalytics('main').trackEvent('user_action', {});
+getGlobalAnalytics('admin').trackEvent('admin_action', {});
+```
+
 ### React Integration
+
+**Enhanced AnalyticsProvider with auto-registration:**
 
 ```typescript
 import React from 'react';
-import { createAnalytics } from 'lobe-analytics';
-import { useAnalytics, useEventTracking } from 'lobe-analytics/react';
+import { createAnalytics } from '@lobehub/analytics';
+import {
+  AnalyticsProvider,
+  useAnalytics,
+  useAnalyticsStrict
+} from '@lobehub/analytics/react';
 
 // Create analytics instance
 const analytics = createAnalytics({
+  business: 'my-app',
   providers: {
     posthog: {
       enabled: true,
@@ -139,44 +208,108 @@ const analytics = createAnalytics({
   },
 });
 
-// Initialize in app startup
-await analytics.initialize();
-
-function MyComponent() {
-  const { trackEvent } = useAnalytics(analytics);
-  const { trackButtonClick } = useEventTracking(analytics);
-
-  const handleSignup = () => {
-    trackEvent('user:signup', { method: 'oauth' });
-  };
-
-  const handleButtonClick = () => {
-    trackButtonClick('cta-button', { page: 'home' });
-  };
-
+// Provider with auto-registration
+function App() {
   return (
-    <div>
-      <button onClick={handleSignup}>Sign Up</button>
-      <button onClick={handleButtonClick}>Learn More</button>
-    </div>
+    <AnalyticsProvider
+      client={analytics}
+      autoInitialize={true}      // Auto-initialize on mount
+      registerGlobal={true}      // Auto-register as global instance
+      globalName="main"          // Optional: custom global name
+    >
+      <MyComponent />
+    </AnalyticsProvider>
   );
+}
+
+// Use in components
+function MyComponent() {
+  const { analytics, isReady, isInitializing, error } = useAnalytics();
+
+  // Safe usage with state checking
+  if (isInitializing) return <div>Loading analytics...</div>;
+  if (error) return <div>Analytics error: {error.message}</div>;
+  if (!isReady) return <div>Analytics not ready</div>;
+
+  const handleClick = () => {
+    analytics?.trackEvent('button_click', {
+      button_name: 'cta',
+      page: 'home',
+    });
+  };
+
+  return <button onClick={handleClick}>Track Event</button>;
+}
+
+// Strict mode (throws if not initialized)
+function StrictComponent() {
+  const analytics = useAnalyticsStrict(); // Throws if not ready
+
+  const handleClick = () => {
+    analytics.trackEvent('button_click', { button_name: 'strict-button' });
+  };
+
+  return <button onClick={handleClick}>Strict Track</button>;
 }
 ```
 
-### PostHog Features
+**Access analytics outside React components:**
 
 ```typescript
-import { PostHogAnalyticsProvider } from 'lobe-analytics';
+import { getGlobalAnalytics } from '@lobehub/analytics/react';
 
-// Access PostHog-specific features
-const provider = analytics.getProvider('posthog') as PostHogAnalyticsProvider;
+// In service functions, API handlers, etc.
+export async function apiCall() {
+  try {
+    const response = await fetch('/api/data');
 
-// Check feature flags
-const isNewFeatureEnabled = provider.isFeatureEnabled('new-feature');
+    // Track success
+    const analytics = getGlobalAnalytics('main');
+    analytics.trackEvent('api_call', {
+      endpoint: '/api/data',
+      success: true,
+    });
 
-if (isNewFeatureEnabled) {
-  // Show new feature
+    return response.json();
+  } catch (error) {
+    // Track error
+    const analytics = getGlobalAnalytics('main');
+    analytics.trackEvent('api_call', {
+      endpoint: '/api/data',
+      success: false,
+      error: error.message,
+    });
+    throw error;
+  }
 }
+```
+
+### SPM (Source Page Medium) Auto-Prefixing
+
+The library automatically handles SPM prefixing with your business name:
+
+```typescript
+const analytics = createAnalytics({
+  business: 'my-app', // This will prefix all SPM values
+  // ... other config
+});
+
+// These events will have SPM auto-prefixed:
+analytics.trackEvent('button_click', {
+  button_name: 'signup',
+  spm: 'homepage.hero', // Becomes: 'my-app.homepage.hero'
+});
+
+analytics.trackEvent('page_view', {
+  page: '/dashboard',
+  spm: 'dashboard.main', // Becomes: 'my-app.dashboard.main'
+});
+
+// If no SPM provided, uses business name as default
+analytics.trackEvent('user_login', {
+  method: 'email',
+  // spm will be: 'my-app'
+});
 ```
 
 <div align="right">
@@ -205,16 +338,90 @@ Main class for managing analytics providers.
 - `identify(userId: string, properties?): Promise<void>` - Identify user
 - `trackPageView(page: string, properties?): Promise<void>` - Track page view
 - `reset(): Promise<void>` - Reset user identity
+- `setGlobalContext(context: EventContext): this` - Set global context
+- `getStatus(): { initialized: boolean; providersCount: number }` - Get status
 
-### React Hooks
+### Global Instance Management
 
-#### `useAnalytics(manager: AnalyticsManager)`
+#### Singleton Pattern
 
-Provides core analytics functionality.
+```typescript
+// Create singleton
+createSingletonAnalytics(config: AnalyticsConfig): AnalyticsManager
 
-#### `useEventTracking(manager: AnalyticsManager)`
+// Get singleton
+getSingletonAnalytics(): AnalyticsManager
+getSingletonAnalyticsOptional(): AnalyticsManager | null
 
-Provides convenient event tracking methods.
+// Check singleton
+hasSingletonAnalytics(): boolean
+resetSingletonAnalytics(): void // For testing
+```
+
+#### Named Global Instances
+
+```typescript
+// Register/unregister
+setGlobalAnalytics(instance: AnalyticsManager, name?: string): void
+removeGlobalAnalytics(name?: string): boolean
+clearGlobalAnalytics(): void
+
+// Access
+getGlobalAnalytics(name?: string): AnalyticsManager
+getGlobalAnalyticsOptional(name?: string): AnalyticsManager | null
+
+// Utilities
+hasGlobalAnalytics(name?: string): boolean
+getGlobalAnalyticsNames(): string[]
+```
+
+### React Hooks & Provider
+
+#### `AnalyticsProvider`
+
+```typescript
+<AnalyticsProvider
+  client={AnalyticsManager}
+  autoInitialize?: boolean      // Default: true
+  registerGlobal?: boolean      // Default: true
+  globalName?: string           // Default: '__default__'
+>
+  {children}
+</AnalyticsProvider>
+```
+
+#### React Hooks
+
+```typescript
+// Safe access with state
+useAnalytics(): {
+  analytics: AnalyticsManager | null;
+  isReady: boolean;
+  isInitialized: boolean;
+  isInitializing: boolean;
+  error: Error | null;
+}
+
+// Strict access (throws if not ready)
+useAnalyticsStrict(): AnalyticsManager
+
+// State only
+useAnalyticsState(): {
+  isReady: boolean;
+  isInitialized: boolean;
+  isInitializing: boolean;
+  error: Error | null;
+}
+
+// Optional access
+useAnalyticsOptional(): AnalyticsManager | null
+
+// Legacy hook (for backward compatibility)
+useEventTracking(manager: AnalyticsManager): {
+  trackButtonClick: (buttonName: string, properties?: any) => void;
+  // ... other convenience methods
+}
+```
 
 ### Types
 
@@ -222,21 +429,25 @@ Provides convenient event tracking methods.
 
 ```typescript
 interface AnalyticsConfig {
+  business: string; // Required: business name for SPM prefixing
   debug?: boolean;
   providers: {
-    posthog?: PostHogConfig;
+    posthog?: PostHogProviderAnalyticsConfig;
+    umami?: UmamiProviderAnalyticsConfig;
+    ga?: GoogleProviderAnalyticsConfig;
   };
 }
 ```
 
-#### `PostHogConfig`
+#### `PostHogProviderAnalyticsConfig`
 
 ```typescript
-interface PostHogConfig {
+interface PostHogProviderAnalyticsConfig {
   enabled: boolean;
   key: string;
   host?: string;
   debug?: boolean;
+  // ... other PostHog config options
 }
 ```
 
@@ -244,11 +455,53 @@ interface PostHogConfig {
 
 ```typescript
 interface PredefinedEvents {
-  'user:signup': { method: 'email' | 'oauth' | 'phone'; source?: string };
-  'user:login': { method: 'email' | 'oauth' | 'phone' };
-  'ui:button_click': { button_name: string; page?: string };
-  'form:submit': { form_name: string; success: boolean };
-  // ... more events
+  // UI interactions
+  button_click: {
+    button_name: string;
+    page?: string;
+    section?: string;
+    spm?: string;
+    [key: string]: any;
+  };
+
+  // User actions
+  user_signup: {
+    method: 'email' | 'oauth' | 'phone';
+    source?: string;
+    spm?: string;
+    [key: string]: any;
+  };
+
+  user_login: {
+    method: 'email' | 'oauth' | 'phone';
+    spm?: string;
+    [key: string]: any;
+  };
+
+  // Chat interactions
+  chat_message_sent: {
+    message_length: number;
+    model?: string;
+    conversation_id?: string;
+    spm?: string;
+    [key: string]: any;
+  };
+
+  // Page tracking
+  page_view: {
+    page: string;
+    referrer?: string;
+    spm?: string;
+    [key: string]: any;
+  };
+
+  // Form interactions
+  form_submit: {
+    form_name: string;
+    success: boolean;
+    spm?: string;
+    [key: string]: any;
+  };
 }
 ```
 
@@ -262,8 +515,8 @@ interface PredefinedEvents {
 
 ```bash
 # Clone the repository
-git clone https://github.com/lobehub/lobe-analytics.git
-cd lobe-analytics
+git clone https://github.com/lobehub/@lobehub/analytics.git
+cd @lobehub/analytics
 
 # Install dependencies
 npm install
@@ -284,15 +537,18 @@ npm run example
 ### Project Structure
 
 ```
-lobe-analytics/
+@lobehub/analytics/
 ├── src/
 │   ├── base.ts           # Base analytics provider
 │   ├── manager.ts        # Analytics manager
 │   ├── config.ts         # Configuration factory
-│   ├── hooks.ts          # React hooks
+│   ├── global.ts         # Global instance management
 │   ├── types.ts          # TypeScript definitions
 │   ├── providers/        # Analytics providers
 │   │   └── posthog.ts    # PostHog implementation
+│   ├── react/            # React integration
+│   │   ├── provider.tsx  # Enhanced Provider component
+│   │   └── hooks.ts      # Legacy hooks
 │   └── index.ts          # Main exports
 ├── examples/             # Usage examples
 └── dist/                 # Built files (generated)
@@ -306,12 +562,17 @@ lobe-analytics/
 
 ## Examples
 
-See the `examples/` directory for complete usage examples:
+See the `examples/` directory for comprehensive usage examples:
 
-- `examples/library-usage.ts` - Complete usage guide with best practices
-- `examples/basic-usage.ts` - Simple implementation example
-- `examples/posthog-usage.ts` - PostHog specific features
+- `examples/library-usage.ts` - Basic library usage and design principles
+- `examples/enhanced-react-usage.tsx` - Advanced React integration
+- `examples/singleton-enhanced-usage.ts` - Singleton pattern examples
+- `examples/global-usage.ts` - Global instance management
+- `examples/business-spm-example.ts` - SPM prefixing demonstration
+- `examples/usage-summary.md` - Complete feature overview
 
 ## License
 
 MIT
+
+<!-- LINK GROUP -->

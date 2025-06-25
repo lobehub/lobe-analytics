@@ -87,7 +87,7 @@ describe('Lobe Analytics Integration Tests', () => {
     let testId: string;
 
     beforeEach(() => {
-      manager = new AnalyticsManager(true); // Enable debug
+      manager = new AnalyticsManager('test', true); // business: 'test', debug: true
       testId = generateTestId();
     });
 
@@ -197,10 +197,11 @@ describe('Lobe Analytics Integration Tests', () => {
         });
 
         expect(mockProvider.events).toHaveLength(1);
-        expect(mockProvider.events[0].name).toBe('ui:button_click');
+        expect(mockProvider.events[0].name).toBe('button_click');
         expect(mockProvider.events[0].properties).toMatchObject({
           button_name: 'test_button',
           page: 'test_page',
+          spm: 'test', // Automatically added business prefix
         });
       });
 
@@ -238,7 +239,10 @@ describe('Lobe Analytics Integration Tests', () => {
         expect(mockProvider.identifiedUsers).toHaveLength(1);
         expect(mockProvider.identifiedUsers[0]).toEqual({
           userId,
-          properties,
+          properties: {
+            ...properties,
+            spm: 'test', // Automatically added business prefix
+          },
         });
       });
 
@@ -254,7 +258,10 @@ describe('Lobe Analytics Integration Tests', () => {
         expect(mockProvider.pageViews).toHaveLength(1);
         expect(mockProvider.pageViews[0]).toEqual({
           page,
-          properties,
+          properties: {
+            ...properties,
+            spm: 'test', // Automatically added business prefix
+          },
         });
       });
 
@@ -317,6 +324,7 @@ describe('Lobe Analytics Integration Tests', () => {
 
       // Create analytics with real PostHog configuration
       const config: AnalyticsConfig = {
+        business: 'test',
         debug: true,
         providers: {
           posthog: testConfig!,
@@ -452,6 +460,7 @@ describe('Lobe Analytics Integration Tests', () => {
   describe('createAnalytics Factory', () => {
     it('should create analytics with mock when PostHog is disabled', () => {
       const config: AnalyticsConfig = {
+        business: 'test',
         debug: true,
         providers: {
           posthog: {
@@ -470,6 +479,7 @@ describe('Lobe Analytics Integration Tests', () => {
 
     it.skipIf(!isPostHogAvailable)('should create analytics with real PostHog when enabled', () => {
       const config: AnalyticsConfig = {
+        business: 'test',
         debug: true,
         providers: {
           posthog: testConfig!,

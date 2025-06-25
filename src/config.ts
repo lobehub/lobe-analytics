@@ -25,11 +25,11 @@ import type { AnalyticsConfig } from './types';
  * ```
  */
 export function createAnalytics(config: AnalyticsConfig): AnalyticsManager {
-  const manager = new AnalyticsManager(config.debug);
+  const manager = new AnalyticsManager(config.business, config.debug);
 
   // Register PostHog if enabled
   if (config.providers.posthog?.enabled) {
-    const provider = new PostHogAnalyticsProvider(config.providers.posthog);
+    const provider = new PostHogAnalyticsProvider(config.providers.posthog, config.business);
     manager.registerProvider('posthog', provider);
   }
 

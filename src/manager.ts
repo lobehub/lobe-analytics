@@ -1,5 +1,6 @@
+/* eslint-disable no-dupe-class-members */
 import { BaseAnalytics } from './base';
-import type { AnalyticsEvent, EventContext, PredefinedEvents } from './types';
+import type { AnalyticsEvent, EventContext, PredefinedEvents, ProviderTypeMap } from './types';
 
 /**
  * Analytics 管理器
@@ -7,11 +8,13 @@ import type { AnalyticsEvent, EventContext, PredefinedEvents } from './types';
  */
 export class AnalyticsManager {
   private readonly providers = new Map<string, BaseAnalytics>();
+  private readonly business: string;
   private globalContext: EventContext = {};
   private initialized = false;
   private readonly debug: boolean;
 
-  constructor(debug = false) {
+  constructor(business: string, debug = false) {
+    this.business = business;
     this.debug = debug;
   }
 
@@ -36,7 +39,9 @@ export class AnalyticsManager {
   /**
    * 获取指定的提供商
    */
-  getProvider(name: string): BaseAnalytics | undefined {
+  getProvider<T extends keyof ProviderTypeMap>(name: T): ProviderTypeMap[T] | undefined;
+  getProvider(name: string): BaseAnalytics | undefined;
+  getProvider(name: string): any {
     return this.providers.get(name);
   }
 
@@ -93,7 +98,8 @@ export class AnalyticsManager {
    */
   async identify(userId: string, properties?: Record<string, any>): Promise<void> {
     if (!this.ensureInitialized()) return;
-    await this.executeOnAllProviders('identify', userId, properties);
+    const enrichedProperties = this.enrichProperties(properties);
+    await this.executeOnAllProviders('identify', userId, enrichedProperties);
   }
 
   /**
@@ -101,7 +107,8 @@ export class AnalyticsManager {
    */
   async trackPageView(page: string, properties?: Record<string, any>): Promise<void> {
     if (!this.ensureInitialized()) return;
-    await this.executeOnAllProviders('trackPageView', page, properties);
+    const enrichedProperties = this.enrichProperties(properties);
+    await this.executeOnAllProviders('trackPageView', page, enrichedProperties);
   }
 
   /**
@@ -186,10 +193,29 @@ export class AnalyticsManager {
       ...event,
       properties: {
         ...this.globalContext,
-        ...event.properties,
+        ...this.enrichProperties(event.properties),
       },
       timestamp: event.timestamp || new Date(),
     };
+  }
+
+  /**
+   * 丰富属性数据，自动处理 spm 前缀
+   */
+  private enrichProperties(properties?: Record<string, any>): Record<string, any> {
+    const enriched = { ...properties };
+
+    if (enriched.spm && typeof enriched.spm === 'string' && enriched.spm.trim()) {
+      // 检查是否已经是正确的格式，避免重复处理
+      if (enriched.spm !== this.business && !enriched.spm.startsWith(`${this.business}.`)) {
+        enriched.spm = `${this.business}.${enriched.spm}`;
+      }
+    } else {
+      // 用户没有提供 spm 或 spm 为空，使用 business 作为默认值
+      enriched.spm = this.business;
+    }
+
+    return enriched;
   }
 
   /**
