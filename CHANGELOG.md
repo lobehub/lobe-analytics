@@ -2,6 +2,31 @@
 
 # Changelog
 
+## [Version 1.1.0](https://github.com/lobehub/lobe-analytics/compare/v1.0.0...v1.1.0)
+
+<sup>Released on **2025-06-25**</sup>
+
+#### ✨ Features
+
+- **misc**: Enhanced-react-usage.
+
+<br/>
+
+<details>
+<summary><kbd>Improvements and Fixes</kbd></summary>
+
+#### What's improved
+
+- **misc**: Enhanced-react-usage ([30345c8](https://github.com/lobehub/lobe-analytics/commit/30345c8))
+
+</details>
+
+<div align="right">
+
+[![](https://img.shields.io/badge/-BACK_TO_TOP-151515?style=flat-square)](#readme-top)
+
+</div>
+
 ## Version 1.0.0
 
 <sup>Released on **2025-06-25**</sup>
