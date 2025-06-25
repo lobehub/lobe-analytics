@@ -2,6 +2,31 @@
 
 # Changelog
 
+### [Version 1.2.1](https://github.com/lobehub/lobe-analytics/compare/v1.2.0...v1.2.1)
+
+<sup>Released on **2025-06-25**</sup>
+
+#### 💄 Styles
+
+- **misc**: Update README.md.
+
+<br/>
+
+<details>
+<summary><kbd>Improvements and Fixes</kbd></summary>
+
+#### Styles
+
+- **misc**: Update README.md, closes [#4](https://github.com/lobehub/lobe-analytics/issues/4) ([ecf320e](https://github.com/lobehub/lobe-analytics/commit/ecf320e))
+
+</details>
+
+<div align="right">
+
+[![](https://img.shields.io/badge/-BACK_TO_TOP-151515?style=flat-square)](#readme-top)
+
+</div>
+
 ## [Version 1.2.0](https://github.com/lobehub/lobe-analytics/compare/v1.1.0...v1.2.0)
 
 <sup>Released on **2025-06-25**</sup>
