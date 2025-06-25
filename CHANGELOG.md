@@ -2,6 +2,39 @@
 
 # Changelog
 
+## [Version 1.2.0](https://github.com/lobehub/lobe-analytics/compare/v1.1.0...v1.2.0)
+
+<sup>Released on **2025-06-25**</sup>
+
+#### ✨ Features
+
+- **misc**: Test.
+
+#### 🐛 Bug Fixes
+
+- **api**: Deps.
+
+<br/>
+
+<details>
+<summary><kbd>Improvements and Fixes</kbd></summary>
+
+#### What's improved
+
+- **misc**: Test ([e2eabc1](https://github.com/lobehub/lobe-analytics/commit/e2eabc1))
+
+#### What's fixed
+
+- **api**: Deps ([f84e72c](https://github.com/lobehub/lobe-analytics/commit/f84e72c))
+
+</details>
+
+<div align="right">
+
+[![](https://img.shields.io/badge/-BACK_TO_TOP-151515?style=flat-square)](#readme-top)
+
+</div>
+
 ## [Version 1.1.0](https://github.com/lobehub/lobe-analytics/compare/v1.0.0...v1.1.0)
 
 <sup>Released on **2025-06-25**</sup>
