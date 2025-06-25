@@ -77,6 +77,7 @@
     "@commitlint/cli": "^19.8.1",
     "@lobehub/lint": "^1.26.2",
     "@types/react": "^18.2.0",
+    "@vitest/coverage-v8": "^3.2.4",
     "clean-package": "^2.2.0",
     "dotenv": "^16.5.0",
     "dpdm": "^3.14.0",
