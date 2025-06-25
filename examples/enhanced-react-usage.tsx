@@ -79,6 +79,13 @@ import React from 'react';
  * 以及如何在组件外部访问 Analytics 实例
  */
 
+/**
+ * 增强的 React 使用示例
+ *
+ * 展示如何在 React 应用中使用 AnalyticsProvider 的全局注册功能，
+ * 以及如何在组件外部访问 Analytics 实例
+ */
+
 // ====== Provider 配置 ======
 
 type Props = {
@@ -120,7 +127,6 @@ export function EnhancedAnalyticsProvider(props: Props) {
 
 // ====== 组件内使用 ======
 
-// 创建 analytics 实例
 const analytics = createAnalytics({
   business: 'example-app',
   debug: true,
