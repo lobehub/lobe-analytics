@@ -1,10 +1,3 @@
-/**
- * 增强的 React 使用示例
- *
- * 展示如何在 React 应用中使用 AnalyticsProvider 的全局注册功能，
- * 以及如何在组件外部访问 Analytics 实例
- */
-
 'use client';
 
 import { createAnalytics, getGlobalAnalytics } from '@lobehub/analytics';
@@ -15,76 +8,6 @@ import {
   useAnalyticsStrict,
 } from '@lobehub/analytics/react';
 import React from 'react';
-
-/**
- * 增强的 React 使用示例
- *
- * 展示如何在 React 应用中使用 AnalyticsProvider 的全局注册功能，
- * 以及如何在组件外部访问 Analytics 实例
- */
-
-/**
- * 增强的 React 使用示例
- *
- * 展示如何在 React 应用中使用 AnalyticsProvider 的全局注册功能，
- * 以及如何在组件外部访问 Analytics 实例
- */
-
-/**
- * 增强的 React 使用示例
- *
- * 展示如何在 React 应用中使用 AnalyticsProvider 的全局注册功能，
- * 以及如何在组件外部访问 Analytics 实例
- */
-
-/**
- * 增强的 React 使用示例
- *
- * 展示如何在 React 应用中使用 AnalyticsProvider 的全局注册功能，
- * 以及如何在组件外部访问 Analytics 实例
- */
-
-/**
- * 增强的 React 使用示例
- *
- * 展示如何在 React 应用中使用 AnalyticsProvider 的全局注册功能，
- * 以及如何在组件外部访问 Analytics 实例
- */
-
-/**
- * 增强的 React 使用示例
- *
- * 展示如何在 React 应用中使用 AnalyticsProvider 的全局注册功能，
- * 以及如何在组件外部访问 Analytics 实例
- */
-
-/**
- * 增强的 React 使用示例
- *
- * 展示如何在 React 应用中使用 AnalyticsProvider 的全局注册功能，
- * 以及如何在组件外部访问 Analytics 实例
- */
-
-/**
- * 增强的 React 使用示例
- *
- * 展示如何在 React 应用中使用 AnalyticsProvider 的全局注册功能，
- * 以及如何在组件外部访问 Analytics 实例
- */
-
-/**
- * 增强的 React 使用示例
- *
- * 展示如何在 React 应用中使用 AnalyticsProvider 的全局注册功能，
- * 以及如何在组件外部访问 Analytics 实例
- */
-
-/**
- * 增强的 React 使用示例
- *
- * 展示如何在 React 应用中使用 AnalyticsProvider 的全局注册功能，
- * 以及如何在组件外部访问 Analytics 实例
- */
 
 // ====== Provider 配置 ======
 
