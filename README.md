@@ -99,7 +99,7 @@ import {
 
 <div align="right">
 
-[!\[\]\[back-to-top\]](#readme-top)
+[![][back-to-top]](#readme-top)
 
 </div>
 
@@ -314,7 +314,7 @@ analytics.trackEvent('user_login', {
 
 <div align="right">
 
-[!\[\]\[back-to-top\]](#readme-top)
+[![][back-to-top]](#readme-top)
 
 </div>
 
@@ -507,7 +507,7 @@ interface PredefinedEvents {
 
 <div align="right">
 
-[!\[\]\[back-to-top\]](#readme-top)
+[![][back-to-top]](#readme-top)
 
 </div>
 
@@ -556,7 +556,7 @@ npm run example
 
 <div align="right">
 
-[!\[\]\[back-to-top\]](#readme-top)
+[![][back-to-top]](#readme-top)
 
 </div>
 
