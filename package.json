@@ -1,6 +1,6 @@
 {
   "name": "@lobehub/analytics",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "A modern, type-safe analytics library for tracking user events across multiple providers, built by LobeHub",
   "homepage": "https://github.com/lobehub/lobe-analytics",
   "bugs": {

@@ -2,6 +2,31 @@
 
 # Changelog
 
+### [Version 1.2.2](https://github.com/lobehub/lobe-analytics/compare/v1.2.1...v1.2.2)
+
+<sup>Released on **2025-06-27**</sup>
+
+#### ♻ Code Refactoring
+
+- **misc**: Examples.
+
+<br/>
+
+<details>
+<summary><kbd>Improvements and Fixes</kbd></summary>
+
+#### Code refactoring
+
+- **misc**: Examples ([8e59a28](https://github.com/lobehub/lobe-analytics/commit/8e59a28))
+
+</details>
+
+<div align="right">
+
+[![](https://img.shields.io/badge/-BACK_TO_TOP-151515?style=flat-square)](#readme-top)
+
+</div>
+
 ### [Version 1.2.1](https://github.com/lobehub/lobe-analytics/compare/v1.2.0...v1.2.1)
 
 <sup>Released on **2025-06-25**</sup>
