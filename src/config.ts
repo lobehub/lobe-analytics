@@ -1,5 +1,6 @@
 import { AnalyticsManager } from './manager';
 import { PostHogAnalyticsProvider } from './providers/posthog';
+import { PostHogNodeAnalyticsProvider } from './providers/posthog-node';
 import type { AnalyticsConfig } from './types';
 
 /**
@@ -31,6 +32,15 @@ export function createAnalytics(config: AnalyticsConfig): AnalyticsManager {
   if (config.providers.posthog?.enabled) {
     const provider = new PostHogAnalyticsProvider(config.providers.posthog, config.business);
     manager.registerProvider('posthog', provider);
+  }
+
+  // Register PostHog Node.js if enabled
+  if (config.providers.posthogNode?.enabled) {
+    const provider = new PostHogNodeAnalyticsProvider(
+      config.providers.posthogNode,
+      config.business,
+    );
+    manager.registerProvider('posthogNode', provider);
   }
 
   // Add more providers as they are implemented

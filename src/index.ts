@@ -6,6 +6,7 @@ export { AnalyticsManager } from './manager';
 
 // Providers
 export { PostHogAnalyticsProvider } from './providers/posthog';
+export { PostHogNodeAnalyticsProvider } from './providers/posthog-node';
 
 // Configuration
 export { createAnalytics } from './config';
@@ -32,6 +33,7 @@ export type {
   AnalyticsEvent,
   EventContext,
   GoogleProviderAnalyticsConfig,
+  PostHogNodeProviderAnalyticsConfig,
   PostHogProviderAnalyticsConfig,
   PredefinedEvents,
   ProviderConfig,

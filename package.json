@@ -71,7 +71,8 @@
     ]
   },
   "dependencies": {
-    "posthog-js": "^1.103.0"
+    "posthog-js": "^1.103.0",
+    "posthog-node": "^4.2.1"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.8.1",

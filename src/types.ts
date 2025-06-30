@@ -2,6 +2,7 @@
  * Lobe Analytics core type definitions
  */
 import { PostHogConfig } from 'posthog-js';
+import { PostHogOptions } from 'posthog-node';
 
 // Base event structure
 export interface AnalyticsEvent {
@@ -69,6 +70,12 @@ export interface PostHogProviderAnalyticsConfig
   key: string;
 }
 
+export interface PostHogNodeProviderAnalyticsConfig
+  extends Partial<PostHogOptions>,
+    ProviderConfig {
+  key: string;
+}
+
 export interface UmamiProviderAnalyticsConfig extends ProviderConfig {
   scriptUrl?: string;
   websiteId: string;
@@ -85,6 +92,7 @@ export interface AnalyticsConfig {
   providers: {
     ga?: GoogleProviderAnalyticsConfig;
     posthog?: PostHogProviderAnalyticsConfig;
+    posthogNode?: PostHogNodeProviderAnalyticsConfig;
     umami?: UmamiProviderAnalyticsConfig;
     // add more providers here
   };
@@ -93,6 +101,7 @@ export interface AnalyticsConfig {
 // Provider type mapping for type-safe provider access
 export interface ProviderTypeMap {
   posthog: import('./providers/posthog').PostHogAnalyticsProvider;
+  posthogNode: import('./providers/posthog-node').PostHogNodeAnalyticsProvider;
   // Add more providers as they are implemented
   // umami: import('./providers/umami').UmamiAnalyticsProvider;
   // ga: import('./providers/ga').GoogleAnalyticsProvider;
