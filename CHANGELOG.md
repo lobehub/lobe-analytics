@@ -2,6 +2,31 @@
 
 # Changelog
 
+### [Version 1.3.1](https://github.com/lobehub/lobe-analytics/compare/v1.3.0...v1.3.1)
+
+<sup>Released on **2025-06-30**</sup>
+
+#### 🐛 Bug Fixes
+
+- **misc**: Vitest issue.
+
+<br/>
+
+<details>
+<summary><kbd>Improvements and Fixes</kbd></summary>
+
+#### What's fixed
+
+- **misc**: Vitest issue ([f5e131a](https://github.com/lobehub/lobe-analytics/commit/f5e131a))
+
+</details>
+
+<div align="right">
+
+[![](https://img.shields.io/badge/-BACK_TO_TOP-151515?style=flat-square)](#readme-top)
+
+</div>
+
 ## [Version 1.3.0](https://github.com/lobehub/lobe-analytics/compare/v1.2.2...v1.3.0)
 
 <sup>Released on **2025-06-30**</sup>
