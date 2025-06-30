@@ -35,52 +35,23 @@ export interface PredefinedEvents {
     // Additional properties
     [key: string]: any;
     button_name: string;
-    page?: string;
-    section?: string;
     spm?: string; // Allow additional properties
   };
 
-  // Chat interactions
-  chat_message_sent: {
-    [key: string]: any;
-    conversation_id?: string;
-    message_length: number;
-    model?: string;
-    spm?: string; // Allow additional properties
-  };
-
-  form_submit: {
-    [key: string]: any;
-    form_name: string;
-    spm?: string;
-    success: boolean; // Allow additional properties
-  };
   page_view: {
     [key: string]: any;
     page: string;
-    referrer?: string;
     spm?: string; // Allow additional properties
   };
 
   // User actions
   user_login: {
     [key: string]: any;
-    method: 'email' | 'oauth' | 'phone';
-    spm?: string; // Allow additional properties
-  };
-
-  user_paid_success: {
-    [key: string]: any;
-    amount: number;
-    currency: string;
-    platform: Platform;
     spm?: string; // Allow additional properties
   };
 
   user_signup: {
     [key: string]: any;
-    method: 'email' | 'oauth' | 'phone';
-    source?: string;
     spm?: string; // Allow additional properties
   };
 }

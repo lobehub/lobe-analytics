@@ -80,18 +80,22 @@ export function useEventTracking(manager: AnalyticsManager) {
 
   const trackFormSubmit = useCallback(
     (formName: string, success: boolean) =>
-      trackEvent('form_submit', { form_name: formName, success }),
-    [trackEvent],
+      manager.track({
+        name: 'form_submit',
+        properties: { form_name: formName, success },
+      }),
+    [manager],
   );
 
   const trackUserSignup = useCallback(
-    (method: 'email' | 'oauth' | 'phone', source?: string) =>
-      trackEvent('user_signup', { method, source }),
+    (spm?: string, extraProperties?: Record<string, any>) =>
+      trackEvent('user_signup', { spm, ...extraProperties }),
     [trackEvent],
   );
 
   const trackUserLogin = useCallback(
-    (method: 'email' | 'oauth' | 'phone') => trackEvent('user_login', { method }),
+    (spm?: string, extraProperties?: Record<string, any>) =>
+      trackEvent('user_login', { spm, ...extraProperties }),
     [trackEvent],
   );
 
