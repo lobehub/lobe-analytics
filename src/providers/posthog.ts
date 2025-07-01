@@ -9,13 +9,11 @@ import type { AnalyticsEvent, PostHogProviderAnalyticsConfig } from '@/types';
  */
 export class PostHogAnalyticsProvider extends BaseAnalytics {
   private readonly config: PostHogProviderAnalyticsConfig;
-  private readonly business: string;
   private initialized = false;
 
   constructor(config: PostHogProviderAnalyticsConfig, business: string) {
-    super({ debug: config.debug, enabled: config.enabled });
+    super({ business, debug: config.debug, enabled: config.enabled });
     this.config = config;
-    this.business = business;
   }
 
   getProviderName(): string {
@@ -216,29 +214,6 @@ export class PostHogAnalyticsProvider extends BaseAnalytics {
 
       return processedEvent;
     };
-  }
-
-  /**
-   * 丰富属性数据，自动处理 spm 前缀
-   * 确保无论通过哪种方式调用都会添加 business 前缀
-   */
-  private enrichProperties(properties?: Record<string, any>): Record<string, any> {
-    const enriched = { ...properties };
-
-    // Add business and spm fields for wrapper calls (before_send will handle direct calls)
-    enriched.business = this.business;
-
-    if (enriched.spm && typeof enriched.spm === 'string' && enriched.spm.trim()) {
-      // 检查是否已经是正确的格式，避免重复处理
-      if (enriched.spm !== this.business && !enriched.spm.startsWith(`${this.business}.`)) {
-        enriched.spm = `${this.business}.${enriched.spm}`;
-      }
-    } else {
-      // 用户没有提供 spm 或 spm 为空，使用 business 作为默认值
-      enriched.spm = this.business;
-    }
-
-    return enriched;
   }
 
   /**

@@ -1,6 +1,5 @@
 import { AnalyticsManager } from './manager';
 import { PostHogAnalyticsProvider } from './providers/posthog';
-import { PostHogNodeAnalyticsProvider } from './providers/posthog-node';
 import type { AnalyticsConfig } from './types';
 
 /**
@@ -34,13 +33,13 @@ export function createAnalytics(config: AnalyticsConfig): AnalyticsManager {
     manager.registerProvider('posthog', provider);
   }
 
-  // Register PostHog Node.js if enabled
+  // Note: posthogNode provider is not available in the client entry point
+  // Use '@lobehub/analytics/server' for server-side analytics
   if (config.providers.posthogNode?.enabled) {
-    const provider = new PostHogNodeAnalyticsProvider(
-      config.providers.posthogNode,
-      config.business,
+    console.warn(
+      'PostHog Node.js provider is not available in the client entry point. ' +
+        'Please use "@lobehub/analytics/server" for server-side analytics.',
     );
-    manager.registerProvider('posthogNode', provider);
   }
 
   // Add more providers as they are implemented

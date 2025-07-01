@@ -6,7 +6,7 @@ export { AnalyticsManager } from './manager';
 
 // Providers
 export { PostHogAnalyticsProvider } from './providers/posthog';
-export { PostHogNodeAnalyticsProvider } from './providers/posthog-node';
+// Note: PostHogNodeAnalyticsProvider is available in '@lobehub/analytics/server'
 
 // Configuration
 export { createAnalytics } from './config';

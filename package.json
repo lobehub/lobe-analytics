@@ -22,6 +22,11 @@
       "types": "./dist/react/index.d.mts",
       "import": "./dist/react/index.mjs",
       "require": "./dist/react/index.cjs"
+    },
+    "./server": {
+      "types": "./dist/server.d.mts",
+      "import": "./dist/server.mjs",
+      "require": "./dist/server.cjs"
     }
   },
   "main": "dist/index.mjs",
@@ -71,8 +76,7 @@
     ]
   },
   "dependencies": {
-    "posthog-js": "^1.103.0",
-    "posthog-node": "^4.2.1"
+    "posthog-js": "^1.103.0"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.8.1",
@@ -84,6 +88,7 @@
     "dpdm": "^3.14.0",
     "eslint": "^8.57.1",
     "husky": "^9.1.7",
+    "jsdom": "^26.1.0",
     "lint-staged": "^16.1.2",
     "prettier": "^3.5.3",
     "react": "^18.2.0",
@@ -102,6 +107,9 @@
     "react": {
       "optional": true
     }
+  },
+  "optionalDependencies": {
+    "posthog-node": "^4.2.1"
   },
   "packageManager": "pnpm@10.11.0",
   "publishConfig": {

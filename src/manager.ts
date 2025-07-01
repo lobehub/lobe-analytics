@@ -98,8 +98,8 @@ export class AnalyticsManager {
    */
   async identify(userId: string, properties?: Record<string, any>): Promise<void> {
     if (!this.ensureInitialized()) return;
-    const enrichedProperties = this.enrichProperties(properties);
-    await this.executeOnAllProviders('identify', userId, enrichedProperties);
+    const mergedProperties = { ...this.globalContext, ...properties };
+    await this.executeOnAllProviders('identify', userId, mergedProperties);
   }
 
   /**
@@ -107,8 +107,8 @@ export class AnalyticsManager {
    */
   async trackPageView(page: string, properties?: Record<string, any>): Promise<void> {
     if (!this.ensureInitialized()) return;
-    const enrichedProperties = this.enrichProperties(properties);
-    await this.executeOnAllProviders('trackPageView', page, enrichedProperties);
+    const mergedProperties = { ...this.globalContext, ...properties };
+    await this.executeOnAllProviders('trackPageView', page, mergedProperties);
   }
 
   /**
@@ -193,29 +193,10 @@ export class AnalyticsManager {
       ...event,
       properties: {
         ...this.globalContext,
-        ...this.enrichProperties(event.properties),
+        ...event.properties,
       },
       timestamp: event.timestamp || new Date(),
     };
-  }
-
-  /**
-   * 丰富属性数据，自动处理 spm 前缀
-   */
-  private enrichProperties(properties?: Record<string, any>): Record<string, any> {
-    const enriched = { ...properties };
-
-    if (enriched.spm && typeof enriched.spm === 'string' && enriched.spm.trim()) {
-      // 检查是否已经是正确的格式，避免重复处理
-      if (enriched.spm !== this.business && !enriched.spm.startsWith(`${this.business}.`)) {
-        enriched.spm = `${this.business}.${enriched.spm}`;
-      }
-    } else {
-      // 用户没有提供 spm 或 spm 为空，使用 business 作为默认值
-      enriched.spm = this.business;
-    }
-
-    return enriched;
   }
 
   /**

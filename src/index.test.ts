@@ -35,6 +35,14 @@ class MockAnalyticsProvider extends BaseAnalytics {
   public pageViews: Array<{ page: string; properties?: Record<string, any> }> = [];
   public resetCalled = false;
 
+  constructor(config?: { business?: string; debug?: boolean; enabled?: boolean }) {
+    super({
+      business: config?.business || 'test',
+      debug: config?.debug ?? false,
+      enabled: config?.enabled ?? true,
+    });
+  }
+
   getProviderName(): string {
     return 'Mock';
   }
@@ -45,18 +53,24 @@ class MockAnalyticsProvider extends BaseAnalytics {
 
   async track(event: AnalyticsEvent): Promise<void> {
     if (!this.validateEvent(event)) return;
-    this.events.push(event);
-    this.log(`Tracked event: ${event.name}`, event);
+    const enrichedEvent = {
+      ...event,
+      properties: this.enrichProperties(event.properties),
+    };
+    this.events.push(enrichedEvent);
+    this.log(`Tracked event: ${event.name}`, enrichedEvent);
   }
 
   async identify(userId: string, properties?: Record<string, any>): Promise<void> {
-    this.identifiedUsers.push({ userId, properties });
-    this.log(`Identified user: ${userId}`, properties);
+    const enrichedProperties = this.enrichProperties(properties);
+    this.identifiedUsers.push({ userId, properties: enrichedProperties });
+    this.log(`Identified user: ${userId}`, enrichedProperties);
   }
 
   async trackPageView(page: string, properties?: Record<string, any>): Promise<void> {
-    this.pageViews.push({ page, properties });
-    this.log(`Tracked page view: ${page}`, properties);
+    const enrichedProperties = this.enrichProperties(properties);
+    this.pageViews.push({ page, properties: enrichedProperties });
+    this.log(`Tracked page view: ${page}`, enrichedProperties);
   }
 
   async reset(): Promise<void> {
@@ -241,6 +255,7 @@ describe('Lobe Analytics Integration Tests', () => {
           userId,
           properties: {
             ...properties,
+            business: 'test', // Automatically added business field
             spm: 'test', // Automatically added business prefix
           },
         });
@@ -260,6 +275,7 @@ describe('Lobe Analytics Integration Tests', () => {
           page,
           properties: {
             ...properties,
+            business: 'test', // Automatically added business field
             spm: 'test', // Automatically added business prefix
           },
         });
@@ -511,15 +527,15 @@ describe('Lobe Analytics Integration Tests', () => {
     }
 
     it('should respect configuration options', () => {
-      const enabledProvider = new TestProvider({ enabled: true, debug: false });
-      const disabledProvider = new TestProvider({ enabled: false, debug: true });
+      const enabledProvider = new TestProvider({ business: 'test', enabled: true, debug: false });
+      const disabledProvider = new TestProvider({ business: 'test', enabled: false, debug: true });
 
       expect(enabledProvider.isEnabledPublic()).toBe(true);
       expect(disabledProvider.isEnabledPublic()).toBe(false);
     });
 
     it('should validate events correctly', () => {
-      const provider = new TestProvider();
+      const provider = new TestProvider({ business: 'test' });
 
       expect(provider.validateEventPublic({ name: 'valid_event' })).toBe(true);
       expect(provider.validateEventPublic({ name: '' })).toBe(false);
@@ -527,8 +543,8 @@ describe('Lobe Analytics Integration Tests', () => {
     });
 
     it('should handle debug logging', () => {
-      const debugProvider = new TestProvider({ debug: true });
-      const silentProvider = new TestProvider({ debug: false });
+      const debugProvider = new TestProvider({ business: 'test', debug: true });
+      const silentProvider = new TestProvider({ business: 'test', debug: false });
 
       // These shouldn't throw
       debugProvider.logPublic('Debug message', { data: 'test' });

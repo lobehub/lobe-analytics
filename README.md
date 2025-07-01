@@ -31,6 +31,9 @@ A modern, type-safe analytics library for tracking user events across multiple p
 
 - [✨ Features](#-features)
 - [📦 Installation](#-installation)
+- [⚠️ **Client-side vs Server-side Usage**](#️-client-side-vs-server-side-usage)
+  - [🌐 **Client-side Usage** (Browser Environment)](#-client-side-usage-browser-environment)
+  - [🖥️ **Server-side Usage** (Node.js Environment)](#️-server-side-usage-nodejs-environment)
 - [Import Structure](#import-structure)
 - [🚀 Quick Start](#-quick-start)
   - [Basic Usage](#basic-usage)
@@ -69,6 +72,9 @@ To install `@lobehub/analytics`, run the following command:
 
 ```bash
 npm install @lobehub/analytics
+
+# Additional installation for server-side usage
+npm install posthog-node # Server-side only
 ```
 
 This library includes PostHog analytics provider out of the box. For React integration:
@@ -77,12 +83,53 @@ This library includes PostHog analytics provider out of the box. For React integ
 npm install react # if not already installed
 ```
 
-## Import Structure
+## ⚠️ **Client-side vs Server-side Usage**
 
-The library provides separate entry points for core functionality and React integration:
+### 🌐 **Client-side Usage** (Browser Environment)
 
 ```typescript
-// Core analytics functionality
+import { createAnalytics } from '@lobehub/analytics';
+
+const analytics = createAnalytics({
+  business: 'my-app',
+  providers: {
+    posthog: { enabled: true, key: 'client_key' },
+  },
+});
+```
+
+### 🖥️ **Server-side Usage** (Node.js Environment)
+
+```typescript
+import { createServerAnalytics } from '@lobehub/analytics/server';
+
+const analytics = createServerAnalytics({
+  business: 'my-app',
+  providers: {
+    // ✅ Client-side PostHog (browser compatible)
+    posthog: {
+      enabled: true,
+      key: 'phc_xxxxx',
+      api_host: 'https://app.posthog.com',
+    },
+    // ✅ Server-side PostHog (Node.js only)
+    posthogNode: {
+      enabled: true,
+      key: 'server_key',
+      host: 'https://app.posthog.com',
+    },
+  },
+});
+```
+
+> **🔥 Separation Solution**: Clear entry point separation ensures `posthogNode` is completely excluded from client-side builds!
+
+## Import Structure
+
+The library provides separate entry points for client-side, server-side, and React integration:
+
+```typescript
+// Client-side analytics (browser safe)
 import { AnalyticsManager, createAnalytics } from '@lobehub/analytics';
 // Global instance management
 import {
@@ -97,6 +144,8 @@ import {
   useAnalyticsStrict,
   useEventTracking,
 } from '@lobehub/analytics/react';
+// Server-side analytics (includes posthog-node)
+import { PostHogNodeAnalyticsProvider, createServerAnalytics } from '@lobehub/analytics/server';
 ```
 
 <div align="right">
@@ -575,7 +624,7 @@ See the `examples/` directory for comprehensive usage examples:
 
 ## 🤝 Contributing
 
-Contributions of all types are more than welcome, if you are interested in contributing code, feel free to check out our GitHub [Issues][github-issues-link] to get stuck in to show us what you’re made of.
+Contributions of all types are more than welcome, if you are interested in contributing code, feel free to check out our GitHub [Issues][github-issues-link] to get stuck in to show us what you're made of.
 
 [![][pr-welcome-shield]][pr-welcome-link]
 

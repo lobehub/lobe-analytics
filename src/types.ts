@@ -1,8 +1,8 @@
 /**
  * Lobe Analytics core type definitions
  */
-import { PostHogConfig } from 'posthog-js';
-import { PostHogOptions } from 'posthog-node';
+import type { PostHogConfig } from 'posthog-js';
+import type { PostHogOptions } from 'posthog-node';
 
 // Base event structure
 export interface AnalyticsEvent {
