@@ -1,21 +1,8 @@
 // React hooks for Analytics integration
 // Note: React is a peer dependency
+import { useCallback } from 'react';
+
 import type { AnalyticsEvent, PredefinedEvents } from '@/types';
-
-// Simple type for useCallback hook
-type CallbackHook = <T extends (...args: any[]) => any>(callback: T, deps: any[]) => T;
-
-// Import React conditionally since it's a peer dependency
-let useCallback: CallbackHook;
-
-try {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const react = require('react');
-  useCallback = react.useCallback;
-} catch {
-  // Fallback when React is not available - just return the function as-is
-  useCallback = (fn: any) => fn;
-}
 
 export type AnalyticsManager = import('../manager').AnalyticsManager;
 
