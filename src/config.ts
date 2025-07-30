@@ -1,4 +1,5 @@
 import { AnalyticsManager } from './manager';
+import { GoogleAnalyticsProvider } from './providers/ga4';
 import { PostHogAnalyticsProvider } from './providers/posthog';
 import type { AnalyticsConfig } from './types';
 
@@ -11,12 +12,20 @@ import type { AnalyticsConfig } from './types';
  * @example
  * ```typescript
  * const analytics = createAnalytics({
+ *   business: 'myapp',
  *   debug: true,
  *   providers: {
  *     posthog: {
  *       enabled: true,
  *       key: 'phc_your_key',
  *       host: 'https://app.posthog.com',
+ *     },
+ *     ga4: {
+ *       enabled: true,
+ *       measurementId: 'G-XXXXXXXXXX',
+ *       gtagConfig: {
+ *         debug_mode: true,
+ *       },
  *     },
  *   },
  * });
@@ -31,6 +40,12 @@ export function createAnalytics(config: AnalyticsConfig): AnalyticsManager {
   if (config.providers.posthog?.enabled) {
     const provider = new PostHogAnalyticsProvider(config.providers.posthog, config.business);
     manager.registerProvider('posthog', provider);
+  }
+
+  // Register Google Analytics 4 if enabled
+  if (config.providers.ga4?.enabled) {
+    const provider = new GoogleAnalyticsProvider(config.providers.ga4, config.business);
+    manager.registerProvider('ga4', provider);
   }
 
   // Note: posthogNode provider is not available in the client entry point
