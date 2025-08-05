@@ -2,6 +2,31 @@
 
 # Changelog
 
+## [Version 1.6.0](https://github.com/lobehub/lobe-analytics/compare/v1.5.1...v1.6.0)
+
+<sup>Released on **2025-08-05**</sup>
+
+#### ✨ Features
+
+- **misc**: Support ga4 provider.
+
+<br/>
+
+<details>
+<summary><kbd>Improvements and Fixes</kbd></summary>
+
+#### What's improved
+
+- **misc**: Support ga4 provider, closes [#5](https://github.com/lobehub/lobe-analytics/issues/5) ([bd69e71](https://github.com/lobehub/lobe-analytics/commit/bd69e71))
+
+</details>
+
+<div align="right">
+
+[![](https://img.shields.io/badge/-BACK_TO_TOP-151515?style=flat-square)](#readme-top)
+
+</div>
+
 ### [Version 1.5.1](https://github.com/lobehub/lobe-analytics/compare/v1.5.0...v1.5.1)
 
 <sup>Released on **2025-07-09**</sup>
