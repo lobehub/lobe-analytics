@@ -81,7 +81,13 @@ export interface UmamiProviderAnalyticsConfig extends ProviderConfig {
   websiteId: string;
 }
 
-export interface GoogleProviderAnalyticsConfig extends ProviderConfig {
+export interface GoogleAnalyticsProviderConfig extends ProviderConfig {
+  // GA4 gtag config options - integrates with official gtag types when available
+  gtagConfig?: {
+    // Allow additional gtag config options
+    [key: string]: any;
+    debug_mode?: boolean;
+  };
   measurementId: string;
 }
 
@@ -90,7 +96,7 @@ export interface AnalyticsConfig {
   business: string;
   debug?: boolean;
   providers: {
-    ga?: GoogleProviderAnalyticsConfig;
+    ga4?: GoogleAnalyticsProviderConfig;
     posthog?: PostHogProviderAnalyticsConfig;
     posthogNode?: PostHogNodeProviderAnalyticsConfig;
     umami?: UmamiProviderAnalyticsConfig;
@@ -100,6 +106,7 @@ export interface AnalyticsConfig {
 
 // Provider type mapping for type-safe provider access
 export interface ProviderTypeMap {
+  ga4: import('./providers/ga4').GoogleAnalyticsProvider;
   posthog: import('./providers/posthog').PostHogAnalyticsProvider;
   posthogNode: import('./providers/posthog-node').PostHogNodeAnalyticsProvider;
   // Add more providers as they are implemented

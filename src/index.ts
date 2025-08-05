@@ -5,6 +5,7 @@ export { BaseAnalytics } from './base';
 export { AnalyticsManager } from './manager';
 
 // Providers
+export { GoogleAnalyticsProvider } from './providers/ga4';
 export { PostHogAnalyticsProvider } from './providers/posthog';
 // Note: PostHogNodeAnalyticsProvider is available in '@lobehub/analytics/server'
 
@@ -32,7 +33,7 @@ export type {
   AnalyticsConfig,
   AnalyticsEvent,
   EventContext,
-  GoogleProviderAnalyticsConfig,
+  GoogleAnalyticsProviderConfig,
   PostHogNodeProviderAnalyticsConfig,
   PostHogProviderAnalyticsConfig,
   PredefinedEvents,
