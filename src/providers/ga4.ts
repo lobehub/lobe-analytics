@@ -43,22 +43,18 @@ export class GoogleAnalyticsProvider extends BaseAnalytics {
         };
       (window as any).gtag = gtag;
 
-      // Check if gtag.js is already loaded or if gtag function exists
-      const gtagExists = typeof (window as any).gtag === 'function';
+      // Stub gtag is always assigned above, so `typeof gtag === 'function'` cannot be used to
+      // decide whether to load gtag.js — that branch was never taken. Inject the script when the
+      // tag is missing from the document (standard GA snippet queues until the script loads).
+      const existingScript = document.querySelector(
+        `script[src*="gtag/js"], script[id*="ga"], script[id*="gtag"]`,
+      );
 
-      // Only load script if gtag function doesn't exist
-      if (!gtagExists) {
-        // Check for existing gtag script
-        const existingScript = document.querySelector(
-          `script[src*="gtag/js"], script[id*="ga"], script[id*="gtag"]`,
-        );
-
-        if (!existingScript) {
-          const script = document.createElement('script');
-          script.async = true;
-          script.src = `https://www.googletagmanager.com/gtag/js?id=${this.config.measurementId}`;
-          document.head.append(script);
-        }
+      if (!existingScript) {
+        const script = document.createElement('script');
+        script.async = true;
+        script.src = `https://www.googletagmanager.com/gtag/js?id=${this.config.measurementId}`;
+        document.head.append(script);
       }
 
       // Initialize gtag
