@@ -7,6 +7,7 @@ export { AnalyticsManager } from './manager';
 // Providers
 export { GoogleAnalyticsProvider } from './providers/ga4';
 export { PostHogAnalyticsProvider } from './providers/posthog';
+export { XAdsAnalyticsProvider } from './providers/xads';
 // Note: PostHogNodeAnalyticsProvider is available in '@lobehub/analytics/server'
 
 // Configuration
@@ -39,6 +40,8 @@ export type {
   PredefinedEvents,
   ProviderConfig,
   UmamiProviderAnalyticsConfig,
+  XAdsEventIdMap,
+  XAdsProviderAnalyticsConfig,
 } from './types';
 
 // Default export
