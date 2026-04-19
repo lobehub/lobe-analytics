@@ -1,6 +1,7 @@
 import { AnalyticsManager } from './manager';
 import { GoogleAnalyticsProvider } from './providers/ga4';
 import { PostHogAnalyticsProvider } from './providers/posthog';
+import { XAdsAnalyticsProvider } from './providers/xads';
 import type { AnalyticsConfig } from './types';
 
 /**
@@ -46,6 +47,12 @@ export function createAnalytics(config: AnalyticsConfig): AnalyticsManager {
   if (config.providers.ga4?.enabled) {
     const provider = new GoogleAnalyticsProvider(config.providers.ga4, config.business);
     manager.registerProvider('ga4', provider);
+  }
+
+  // Register X Ads if enabled
+  if (config.providers.xAds?.enabled) {
+    const provider = new XAdsAnalyticsProvider(config.providers.xAds, config.business);
+    manager.registerProvider('xAds', provider);
   }
 
   // Note: posthogNode provider is not available in the client entry point

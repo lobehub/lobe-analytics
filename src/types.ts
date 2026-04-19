@@ -91,6 +91,16 @@ export interface GoogleAnalyticsProviderConfig extends ProviderConfig {
   measurementId: string;
 }
 
+export interface XAdsEventIdMap {
+  [eventName: string]: string | undefined;
+}
+
+export interface XAdsProviderAnalyticsConfig extends ProviderConfig {
+  eventIds?: XAdsEventIdMap;
+  pixelId: string;
+  purchaseEventId?: string;
+}
+
 // Main analytics configuration
 export interface AnalyticsConfig {
   business: string;
@@ -100,6 +110,7 @@ export interface AnalyticsConfig {
     posthog?: PostHogProviderAnalyticsConfig;
     posthogNode?: PostHogNodeProviderAnalyticsConfig;
     umami?: UmamiProviderAnalyticsConfig;
+    xAds?: XAdsProviderAnalyticsConfig;
     // add more providers here
   };
 }
@@ -109,6 +120,7 @@ export interface ProviderTypeMap {
   ga4: import('./providers/ga4').GoogleAnalyticsProvider;
   posthog: import('./providers/posthog').PostHogAnalyticsProvider;
   posthogNode: import('./providers/posthog-node').PostHogNodeAnalyticsProvider;
+  xAds: import('./providers/xads').XAdsAnalyticsProvider;
   // Add more providers as they are implemented
   // umami: import('./providers/umami').UmamiAnalyticsProvider;
   // ga: import('./providers/ga').GoogleAnalyticsProvider;
