@@ -2,6 +2,31 @@
 
 # Changelog
 
+### [Version 1.6.2](https://github.com/lobehub/lobe-analytics/compare/v1.6.1...v1.6.2)
+
+<sup>Released on **2026-04-19**</sup>
+
+#### 💄 Styles
+
+- **misc**: Add x ads analytics provider.
+
+<br/>
+
+<details>
+<summary><kbd>Improvements and Fixes</kbd></summary>
+
+#### Styles
+
+- **misc**: Add x ads analytics provider, closes [#7](https://github.com/lobehub/lobe-analytics/issues/7) ([3ace191](https://github.com/lobehub/lobe-analytics/commit/3ace191))
+
+</details>
+
+<div align="right">
+
+[![](https://img.shields.io/badge/-BACK_TO_TOP-151515?style=flat-square)](#readme-top)
+
+</div>
+
 ### [Version 1.6.1](https://github.com/lobehub/lobe-analytics/compare/v1.6.0...v1.6.1)
 
 <sup>Released on **2026-04-13**</sup>
