@@ -2,6 +2,31 @@
 
 # Changelog
 
+### [Version 1.6.3](https://github.com/lobehub/lobe-analytics/compare/v1.6.2...v1.6.3)
+
+<sup>Released on **2026-05-23**</sup>
+
+#### 🐛 Bug Fixes
+
+- **posthog**: Capture SPA pageviews on history changes.
+
+<br/>
+
+<details>
+<summary><kbd>Improvements and Fixes</kbd></summary>
+
+#### What's fixed
+
+- **posthog**: Capture SPA pageviews on history changes, closes [#8](https://github.com/lobehub/lobe-analytics/issues/8) ([9adee3f](https://github.com/lobehub/lobe-analytics/commit/9adee3f))
+
+</details>
+
+<div align="right">
+
+[![](https://img.shields.io/badge/-BACK_TO_TOP-151515?style=flat-square)](#readme-top)
+
+</div>
+
 ### [Version 1.6.2](https://github.com/lobehub/lobe-analytics/compare/v1.6.1...v1.6.2)
 
 <sup>Released on **2026-04-19**</sup>
