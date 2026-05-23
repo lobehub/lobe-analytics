@@ -33,6 +33,7 @@ export class PostHogAnalyticsProvider extends BaseAnalytics {
       const initConfig = {
         ...posthogConfig, // User's posthog-js config options
         api_host: host || posthogConfig.api_host || 'https://app.posthog.com',
+        capture_pageview: posthogConfig.capture_pageview ?? 'history_change',
         // Use before_send to dynamically add business context to all events
         before_send: this.createBeforeSendHandler(posthogConfig.before_send),
         debug: this.debug,
