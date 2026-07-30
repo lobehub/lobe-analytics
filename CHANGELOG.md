@@ -2,6 +2,31 @@
 
 # Changelog
 
+### [Version 1.6.4](https://github.com/lobehub/lobe-analytics/compare/v1.6.3...v1.6.4)
+
+<sup>Released on **2026-07-30**</sup>
+
+#### 🐛 Bug Fixes
+
+- **analytics**: Respect capture consent across providers.
+
+<br/>
+
+<details>
+<summary><kbd>Improvements and Fixes</kbd></summary>
+
+#### What's fixed
+
+- **analytics**: Respect capture consent across providers, closes [#9](https://github.com/lobehub/lobe-analytics/issues/9) ([d54eb0f](https://github.com/lobehub/lobe-analytics/commit/d54eb0f))
+
+</details>
+
+<div align="right">
+
+[![](https://img.shields.io/badge/-BACK_TO_TOP-151515?style=flat-square)](#readme-top)
+
+</div>
+
 ### [Version 1.6.3](https://github.com/lobehub/lobe-analytics/compare/v1.6.2...v1.6.3)
 
 <sup>Released on **2026-05-23**</sup>
