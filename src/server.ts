@@ -34,7 +34,7 @@ export {
  * Create server analytics with full provider support including posthog-node
  */
 export function createServerAnalytics(config: AnalyticsConfig): AnalyticsManager {
-  const manager = new AnalyticsManager(config.business, config.debug);
+  const manager = new AnalyticsManager(config.business, config.debug, config.captureEnabled);
 
   // Register PostHog browser if enabled
   if (config.providers.posthog?.enabled) {

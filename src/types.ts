@@ -64,15 +64,13 @@ export interface ProviderConfig {
 }
 
 export interface PostHogProviderAnalyticsConfig
-  extends Partial<Omit<PostHogConfig, 'debug'>>,
-    ProviderConfig {
+  extends Partial<Omit<PostHogConfig, 'debug'>>, ProviderConfig {
   host?: string;
   key: string;
 }
 
 export interface PostHogNodeProviderAnalyticsConfig
-  extends Partial<PostHogOptions>,
-    ProviderConfig {
+  extends Partial<PostHogOptions>, ProviderConfig {
   key: string;
 }
 
@@ -104,6 +102,13 @@ export interface XAdsProviderAnalyticsConfig extends ProviderConfig {
 // Main analytics configuration
 export interface AnalyticsConfig {
   business: string;
+  /**
+   * Whether analytics capture is allowed.
+   *
+   * Leave undefined to preserve the provider's existing consent state.
+   * Set to false before initialization to start providers in an opted-out state.
+   */
+  captureEnabled?: boolean;
   debug?: boolean;
   providers: {
     ga4?: GoogleAnalyticsProviderConfig;

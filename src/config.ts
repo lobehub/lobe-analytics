@@ -35,7 +35,7 @@ import type { AnalyticsConfig } from './types';
  * ```
  */
 export function createAnalytics(config: AnalyticsConfig): AnalyticsManager {
-  const manager = new AnalyticsManager(config.business, config.debug);
+  const manager = new AnalyticsManager(config.business, config.debug, config.captureEnabled);
 
   // Register PostHog if enabled
   if (config.providers.posthog?.enabled) {

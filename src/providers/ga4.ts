@@ -11,6 +11,7 @@ import type { AnalyticsEvent, GoogleAnalyticsProviderConfig } from '@/types';
  */
 export class GoogleAnalyticsProvider extends BaseAnalytics {
   private readonly config: GoogleAnalyticsProviderConfig;
+  private initialPageViewSuppressed = false;
   private initialized = false;
 
   constructor(config: GoogleAnalyticsProviderConfig, business: string) {
@@ -33,6 +34,8 @@ export class GoogleAnalyticsProvider extends BaseAnalytics {
         this.logError('GA4 provider requires browser environment');
         return;
       }
+
+      this.syncCaptureState();
 
       // Initialize dataLayer if not exists
       (window as any).dataLayer = (window as any).dataLayer || [];
@@ -60,15 +63,8 @@ export class GoogleAnalyticsProvider extends BaseAnalytics {
       // Initialize gtag
       gtag('js', new Date());
 
-      // Configure GA4 with user config and our defaults
-      const configOptions = {
-        // User's gtag config options
-        ...this.config.gtagConfig,
-        // Our internal config (these override user config for consistency)
-        debug_mode: this.debug || this.config.gtagConfig?.debug_mode,
-      };
-
-      gtag('config', this.config.measurementId, configOptions);
+      this.initialPageViewSuppressed = !this.isCaptureEnabled();
+      this.configureGtag(gtag);
 
       this.initialized = true;
       this.log('Google Analytics 4 initialized successfully');
@@ -81,7 +77,12 @@ export class GoogleAnalyticsProvider extends BaseAnalytics {
   }
 
   async track(event: AnalyticsEvent): Promise<void> {
-    if (!this.isEnabled() || !this.initialized || !this.validateEvent(event)) {
+    if (
+      !this.isEnabled() ||
+      !this.isCaptureEnabled() ||
+      !this.initialized ||
+      !this.validateEvent(event)
+    ) {
       return;
     }
 
@@ -110,7 +111,7 @@ export class GoogleAnalyticsProvider extends BaseAnalytics {
   }
 
   async identify(userId: string, properties?: Record<string, any>): Promise<void> {
-    if (!this.isEnabled() || !this.initialized) {
+    if (!this.isEnabled() || !this.isCaptureEnabled() || !this.initialized) {
       return;
     }
 
@@ -147,7 +148,7 @@ export class GoogleAnalyticsProvider extends BaseAnalytics {
   }
 
   async trackPageView(page: string, properties?: Record<string, any>): Promise<void> {
-    if (!this.isEnabled() || !this.initialized) {
+    if (!this.isEnabled() || !this.isCaptureEnabled() || !this.initialized) {
       return;
     }
 
@@ -192,12 +193,33 @@ export class GoogleAnalyticsProvider extends BaseAnalytics {
         user_properties: {},
       });
 
-      // 3. Track logout event
-      gtag('event', 'logout', this.enrichProperties());
+      // 3. Track logout only when capture is still allowed
+      if (this.isCaptureEnabled()) {
+        gtag('event', 'logout', this.enrichProperties());
+      }
 
-      this.log('Reset user identity and tracked logout');
+      this.log('Reset user identity');
     } catch (error) {
       this.logError('Failed to reset user identity', error);
+    }
+  }
+
+  override setCaptureEnabled(enabled: boolean): void {
+    const previousCaptureEnabled = this.getCaptureEnabled();
+    super.setCaptureEnabled(enabled);
+    this.syncCaptureState();
+
+    if (
+      enabled &&
+      previousCaptureEnabled === false &&
+      this.initialized &&
+      this.initialPageViewSuppressed
+    ) {
+      const gtag = (window as any).gtag;
+      if (gtag) {
+        this.configureGtag(gtag);
+        this.initialPageViewSuppressed = false;
+      }
     }
   }
 
@@ -253,6 +275,29 @@ export class GoogleAnalyticsProvider extends BaseAnalytics {
    */
   getMeasurementId(): string {
     return this.config.measurementId;
+  }
+
+  private configureGtag(gtag: (...args: unknown[]) => void): void {
+    const configOptions = {
+      // User's gtag config options
+      ...this.config.gtagConfig,
+      // Our internal config (these override user config for consistency)
+      debug_mode: this.debug || this.config.gtagConfig?.debug_mode,
+      ...(!this.isCaptureEnabled() && { send_page_view: false }),
+    };
+
+    gtag('config', this.config.measurementId, configOptions);
+  }
+
+  private syncCaptureState(): void {
+    const captureEnabled = this.getCaptureEnabled();
+    if (typeof window === 'undefined' || captureEnabled === undefined) {
+      return;
+    }
+
+    // Google documents this flag as the strict opt-out mechanism that prevents
+    // the tag from sending data, including cookieless consent-mode pings.
+    (window as any)[`ga-disable-${this.config.measurementId}`] = !captureEnabled;
   }
 
   /**

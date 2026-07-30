@@ -43,6 +43,7 @@ declare global {
  */
 export class XAdsAnalyticsProvider extends BaseAnalytics {
   private readonly config: XAdsProviderAnalyticsConfig;
+  private initializationRequested = false;
   private initialized = false;
 
   constructor(config: XAdsProviderAnalyticsConfig, business: string) {
@@ -56,6 +57,13 @@ export class XAdsAnalyticsProvider extends BaseAnalytics {
 
   async initialize(): Promise<void> {
     if (!this.isEnabled() || this.initialized) {
+      return;
+    }
+
+    this.initializationRequested = true;
+
+    if (!this.isCaptureEnabled()) {
+      this.log('Deferring X Ads initialization until capture is enabled');
       return;
     }
 
@@ -90,7 +98,12 @@ export class XAdsAnalyticsProvider extends BaseAnalytics {
   }
 
   async track(event: AnalyticsEvent): Promise<void> {
-    if (!this.isEnabled() || !this.initialized || !this.validateEvent(event)) {
+    if (
+      !this.isEnabled() ||
+      !this.isCaptureEnabled() ||
+      !this.initialized ||
+      !this.validateEvent(event)
+    ) {
       return;
     }
 
@@ -135,6 +148,22 @@ export class XAdsAnalyticsProvider extends BaseAnalytics {
 
   async reset(): Promise<void> {
     this.log('Reset is not supported in X Ads provider');
+  }
+
+  override setCaptureEnabled(enabled: boolean): void {
+    const previousCaptureEnabled = this.getCaptureEnabled();
+    super.setCaptureEnabled(enabled);
+
+    if (
+      enabled &&
+      previousCaptureEnabled === false &&
+      this.initializationRequested &&
+      !this.initialized
+    ) {
+      void this.initialize().catch((error) => {
+        this.logError('Failed to initialize X Ads after enabling capture', error);
+      });
+    }
   }
 
   private ensureScript(state: XAdsGlobalState) {

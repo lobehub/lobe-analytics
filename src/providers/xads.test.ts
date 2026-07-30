@@ -3,6 +3,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { XAdsAnalyticsProvider } from './xads';
 
+const xAdsScriptSelector = 'script[src="https://static.ads-twitter.com/uwt.js"]';
+
 const getQueuedCommands = () => {
   return ((window.twq?.queue ?? []) as unknown[][]).map((args) => [...args]);
 };
@@ -38,6 +40,27 @@ describe('XAdsAnalyticsProvider', () => {
 
     expect(scripts).toHaveLength(1);
     expect(configCommands).toEqual([['config', 'tw-pixel_123']]);
+  });
+
+  it('should defer loading the pixel until capture is enabled', async () => {
+    const provider = new XAdsAnalyticsProvider(
+      {
+        enabled: true,
+        pixelId: 'tw-pixel_123',
+      },
+      'test',
+    );
+
+    provider.setCaptureEnabled(false);
+    await provider.initialize();
+
+    expect(document.querySelector(xAdsScriptSelector)).toBeNull();
+    expect(window.twq).toBeUndefined();
+
+    provider.setCaptureEnabled(true);
+
+    expect(document.querySelector(xAdsScriptSelector)).not.toBeNull();
+    expect(getQueuedCommands()).toContainEqual(['config', 'tw-pixel_123']);
   });
 
   it('should track purchase events with mapped parameters', async () => {

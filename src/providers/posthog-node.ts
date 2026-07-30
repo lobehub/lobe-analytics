@@ -50,7 +50,13 @@ export class PostHogNodeAnalyticsProvider extends BaseAnalytics {
   }
 
   async track(event: AnalyticsEvent): Promise<void> {
-    if (!this.isEnabled() || !this.initialized || !this.client || !this.validateEvent(event)) {
+    if (
+      !this.isEnabled() ||
+      !this.isCaptureEnabled() ||
+      !this.initialized ||
+      !this.client ||
+      !this.validateEvent(event)
+    ) {
       return;
     }
 
@@ -71,7 +77,7 @@ export class PostHogNodeAnalyticsProvider extends BaseAnalytics {
   }
 
   async identify(userId: string, properties?: Record<string, any>): Promise<void> {
-    if (!this.isEnabled() || !this.initialized || !this.client) {
+    if (!this.isEnabled() || !this.isCaptureEnabled() || !this.initialized || !this.client) {
       return;
     }
 
@@ -90,7 +96,7 @@ export class PostHogNodeAnalyticsProvider extends BaseAnalytics {
   }
 
   async trackPageView(page: string, properties?: Record<string, any>): Promise<void> {
-    if (!this.isEnabled() || !this.initialized || !this.client) {
+    if (!this.isEnabled() || !this.isCaptureEnabled() || !this.initialized || !this.client) {
       return;
     }
 
@@ -136,7 +142,10 @@ export class PostHogNodeAnalyticsProvider extends BaseAnalytics {
     }
 
     try {
-      const result = await this.client.isFeatureEnabled(flag, distinctId, groups);
+      const result = await this.client.isFeatureEnabled(flag, distinctId, {
+        groups,
+        sendFeatureFlagEvents: this.isCaptureEnabled(),
+      });
       return Boolean(result);
     } catch (error) {
       this.logError(`Failed to check feature flag: ${flag}`, error);
@@ -157,7 +166,10 @@ export class PostHogNodeAnalyticsProvider extends BaseAnalytics {
     }
 
     try {
-      return await this.client.getFeatureFlag(flag, distinctId, groups);
+      return await this.client.getFeatureFlag(flag, distinctId, {
+        groups,
+        sendFeatureFlagEvents: this.isCaptureEnabled(),
+      });
     } catch (error) {
       this.logError(`Failed to get feature flag: ${flag}`, error);
       return undefined;
@@ -237,7 +249,7 @@ export class PostHogNodeAnalyticsProvider extends BaseAnalytics {
     groupKey: string,
     properties?: Record<string, any>,
   ): Promise<void> {
-    if (!this.isEnabled() || !this.initialized || !this.client) {
+    if (!this.isEnabled() || !this.isCaptureEnabled() || !this.initialized || !this.client) {
       return;
     }
 
@@ -260,7 +272,7 @@ export class PostHogNodeAnalyticsProvider extends BaseAnalytics {
    * Create alias between user IDs
    */
   async alias(distinctId: string, alias: string): Promise<void> {
-    if (!this.isEnabled() || !this.initialized || !this.client) {
+    if (!this.isEnabled() || !this.isCaptureEnabled() || !this.initialized || !this.client) {
       return;
     }
 

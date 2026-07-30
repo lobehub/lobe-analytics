@@ -9,19 +9,25 @@ import type { AnalyticsEvent, EventContext, PredefinedEvents, ProviderTypeMap } 
 export class AnalyticsManager {
   private readonly providers = new Map<string, BaseAnalytics>();
   private readonly business: string;
+  private captureEnabled: boolean | undefined;
   private globalContext: EventContext = {};
   private initialized = false;
   private readonly debug: boolean;
 
-  constructor(business: string, debug = false) {
+  constructor(business: string, debug = false, captureEnabled?: boolean) {
     this.business = business;
     this.debug = debug;
+    this.captureEnabled = captureEnabled;
   }
 
   /**
    * 注册分析工具提供商
    */
   registerProvider(name: string, provider: BaseAnalytics): this {
+    if (this.captureEnabled !== undefined) {
+      provider.setCaptureEnabled(this.captureEnabled);
+    }
+
     this.providers.set(name, provider);
     this.log(`Registered provider: ${name}`);
     return this;
@@ -74,7 +80,7 @@ export class AnalyticsManager {
    * 追踪事件到所有提供商
    */
   async track(event: AnalyticsEvent): Promise<void> {
-    if (!this.ensureInitialized()) return;
+    if (!this.ensureCaptureEnabled()) return;
 
     const enrichedEvent = this.enrichEvent(event);
     await this.executeOnAllProviders('track', enrichedEvent);
@@ -97,7 +103,7 @@ export class AnalyticsManager {
    * 识别用户
    */
   async identify(userId: string, properties?: Record<string, any>): Promise<void> {
-    if (!this.ensureInitialized()) return;
+    if (!this.ensureCaptureEnabled()) return;
     const mergedProperties = { ...this.globalContext, ...properties };
     await this.executeOnAllProviders('identify', userId, mergedProperties);
   }
@@ -106,7 +112,7 @@ export class AnalyticsManager {
    * 追踪页面浏览
    */
   async trackPageView(page: string, properties?: Record<string, any>): Promise<void> {
-    if (!this.ensureInitialized()) return;
+    if (!this.ensureCaptureEnabled()) return;
     const mergedProperties = { ...this.globalContext, ...properties };
     await this.executeOnAllProviders('trackPageView', page, mergedProperties);
   }
@@ -117,6 +123,30 @@ export class AnalyticsManager {
   async reset(): Promise<void> {
     if (!this.ensureInitialized()) return;
     await this.executeOnAllProviders('reset');
+  }
+
+  /**
+   * Enable or disable capture for all providers.
+   *
+   * Reset remains available while capture is disabled so applications can
+   * clear user identity during logout or consent withdrawal.
+   */
+  setCaptureEnabled(enabled: boolean): this {
+    this.captureEnabled = enabled;
+
+    for (const provider of this.providers.values()) {
+      try {
+        provider.setCaptureEnabled(enabled);
+      } catch (error) {
+        console.error(
+          `[AnalyticsManager] Failed to update capture state for ${provider.getProviderName()}:`,
+          error,
+        );
+      }
+    }
+
+    this.log(`Capture ${enabled ? 'enabled' : 'disabled'}`);
+    return this;
   }
 
   /**
@@ -138,8 +168,9 @@ export class AnalyticsManager {
   /**
    * 获取管理器状态
    */
-  getStatus(): { initialized: boolean; providersCount: number } {
+  getStatus(): { captureEnabled: boolean; initialized: boolean; providersCount: number } {
     return {
+      captureEnabled: this.captureEnabled !== false,
       initialized: this.initialized,
       providersCount: this.providers.size,
     };
@@ -153,6 +184,22 @@ export class AnalyticsManager {
       console.warn('[AnalyticsManager] Not initialized. Call initialize() first.');
       return false;
     }
+    return true;
+  }
+
+  /**
+   * Check whether capture is initialized and allowed.
+   */
+  private ensureCaptureEnabled(): boolean {
+    if (!this.ensureInitialized()) {
+      return false;
+    }
+
+    if (this.captureEnabled === false) {
+      this.log('Capture is disabled');
+      return false;
+    }
+
     return true;
   }
 
