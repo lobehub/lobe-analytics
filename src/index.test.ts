@@ -296,6 +296,29 @@ describe('Lobe Analytics Integration Tests', () => {
         expect(mockProvider.events).toHaveLength(0);
         expect(mockProvider.identifiedUsers).toHaveLength(0);
       });
+
+      it('should suppress capture while disabled and resume after opt-in', async () => {
+        manager.setCaptureEnabled(false);
+
+        await manager.track({ name: 'disabled_event' });
+        await manager.identify(`user_${testId}`);
+        await manager.trackPageView('/disabled');
+
+        expect(manager.getStatus().captureEnabled).toBe(false);
+        expect(mockProvider.events).toHaveLength(0);
+        expect(mockProvider.identifiedUsers).toHaveLength(0);
+        expect(mockProvider.pageViews).toHaveLength(0);
+
+        // Identity cleanup must remain available after consent withdrawal.
+        await manager.reset();
+        expect(mockProvider.resetCalled).toBe(true);
+
+        manager.setCaptureEnabled(true);
+        await manager.track({ name: 'enabled_event' });
+
+        expect(manager.getStatus().captureEnabled).toBe(true);
+        expect(mockProvider.events).toHaveLength(1);
+      });
     });
 
     describe('Global Context Management', () => {

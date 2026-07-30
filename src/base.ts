@@ -8,6 +8,7 @@ export abstract class BaseAnalytics {
   protected readonly debug: boolean;
   protected readonly enabled: boolean;
   protected readonly business: string;
+  private captureEnabled: boolean | undefined;
 
   constructor(config: { business: string; debug?: boolean; enabled?: boolean }) {
     this.debug = config.debug ?? false;
@@ -46,6 +47,17 @@ export abstract class BaseAnalytics {
   abstract getProviderName(): string;
 
   /**
+   * Update whether this provider may capture analytics data.
+   *
+   * Providers with native consent APIs can override this method to synchronize
+   * the state with their SDK after calling super.
+   */
+  setCaptureEnabled(enabled: boolean): void {
+    this.captureEnabled = enabled;
+    this.log(`Capture ${enabled ? 'enabled' : 'disabled'}`);
+  }
+
+  /**
    * Check if provider is enabled
    */
   protected isEnabled(): boolean {
@@ -54,6 +66,27 @@ export abstract class BaseAnalytics {
       return false;
     }
     return true;
+  }
+
+  /**
+   * Check whether analytics capture is allowed.
+   */
+  protected isCaptureEnabled(): boolean {
+    if (this.captureEnabled === false) {
+      this.log('Capture is disabled');
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * Get the explicitly configured capture state.
+   *
+   * Undefined means the consumer has not opted into library-managed consent.
+   */
+  protected getCaptureEnabled(): boolean | undefined {
+    return this.captureEnabled;
   }
 
   /**

@@ -23,9 +23,11 @@ const AnalyticsContext = createContext<AnalyticsContextValue | undefined>(undefi
 /**
  * Analytics Provider Props
  */
-interface AnalyticsProviderProps {
+export interface AnalyticsProviderProps {
   /** 是否自动初始化（默认: true） */
   autoInitialize?: boolean;
+  /** 是否允许采集；传入 false 会在初始化前进入 opt-out 状态 */
+  captureEnabled?: boolean;
   /** 子组件 */
   children: ReactNode;
   /** 配置好的 Analytics 实例 */
@@ -73,6 +75,7 @@ export function AnalyticsProvider({
   client,
   children,
   autoInitialize = true,
+  captureEnabled,
   globalName = '__default__',
   onInitializeError,
   onInitializeSuccess,
@@ -88,6 +91,13 @@ export function AnalyticsProvider({
       setGlobalAnalytics(client, globalName);
     }
   }, [client, globalName, registerGlobal]);
+
+  // 在初始化 provider 前同步同意状态，避免自动采集抢跑。
+  useLayoutEffect(() => {
+    if (captureEnabled !== undefined) {
+      client.setCaptureEnabled(captureEnabled);
+    }
+  }, [captureEnabled, client]);
 
   useLayoutEffect(() => {
     if (!autoInitialize || isInitialized || isInitializing) {

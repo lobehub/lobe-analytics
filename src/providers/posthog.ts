@@ -1,4 +1,5 @@
-import { BeforeSendFn, CaptureResult, posthog } from 'posthog-js';
+import { posthog } from 'posthog-js';
+import type { BeforeSendFn, CaptureResult } from 'posthog-js';
 
 import { BaseAnalytics } from '@/base';
 import type { AnalyticsEvent, PostHogProviderAnalyticsConfig } from '@/types';
@@ -27,22 +28,29 @@ export class PostHogAnalyticsProvider extends BaseAnalytics {
 
     try {
       // Extract provider-specific properties and prepare posthog config
-      const { key, host, ...posthogConfig } = this.config;
+      const { debug, enabled, host, key, ...posthogConfig } = this.config;
+      void debug;
+      void enabled;
 
       // Build init config: start with user's posthog config, then apply our defaults/overrides
       const initConfig = {
         ...posthogConfig, // User's posthog-js config options
         api_host: host || posthogConfig.api_host || 'https://app.posthog.com',
-        capture_pageview: posthogConfig.capture_pageview ?? 'history_change',
         // Use before_send to dynamically add business context to all events
         before_send: this.createBeforeSendHandler(posthogConfig.before_send),
+        capture_pageview: posthogConfig.capture_pageview ?? 'history_change',
         debug: this.debug,
         loaded: () => this.log('PostHog loaded and ready'),
+        opt_out_capturing_by_default:
+          !this.isCaptureEnabled() || posthogConfig.opt_out_capturing_by_default,
+        opt_out_persistence_by_default:
+          !this.isCaptureEnabled() || posthogConfig.opt_out_persistence_by_default,
       };
 
       posthog.init(key, initConfig);
 
       this.initialized = true;
+      this.syncCaptureState();
       this.log('PostHog initialized successfully');
       this.log(`Using before_send to add business context: ${this.business}`);
     } catch (error) {
@@ -52,7 +60,12 @@ export class PostHogAnalyticsProvider extends BaseAnalytics {
   }
 
   async track(event: AnalyticsEvent): Promise<void> {
-    if (!this.isEnabled() || !this.initialized || !this.validateEvent(event)) {
+    if (
+      !this.isEnabled() ||
+      !this.isCaptureEnabled() ||
+      !this.initialized ||
+      !this.validateEvent(event)
+    ) {
       return;
     }
 
@@ -71,7 +84,7 @@ export class PostHogAnalyticsProvider extends BaseAnalytics {
   }
 
   async identify(userId: string, properties?: Record<string, any>): Promise<void> {
-    if (!this.isEnabled() || !this.initialized) {
+    if (!this.isEnabled() || !this.isCaptureEnabled() || !this.initialized) {
       return;
     }
 
@@ -85,7 +98,7 @@ export class PostHogAnalyticsProvider extends BaseAnalytics {
   }
 
   async trackPageView(page: string, properties?: Record<string, any>): Promise<void> {
-    if (!this.isEnabled() || !this.initialized) {
+    if (!this.isEnabled() || !this.isCaptureEnabled() || !this.initialized) {
       return;
     }
 
@@ -113,6 +126,11 @@ export class PostHogAnalyticsProvider extends BaseAnalytics {
     } catch (error) {
       this.logError('Failed to reset user identity', error);
     }
+  }
+
+  override setCaptureEnabled(enabled: boolean): void {
+    super.setCaptureEnabled(enabled);
+    this.syncCaptureState();
   }
 
   /**
@@ -238,5 +256,18 @@ export class PostHogAnalyticsProvider extends BaseAnalytics {
    */
   getCurrentBusiness(): string {
     return this.business;
+  }
+
+  private syncCaptureState(): void {
+    const captureEnabled = this.getCaptureEnabled();
+    if (!this.initialized || captureEnabled === undefined) {
+      return;
+    }
+
+    if (captureEnabled) {
+      posthog.opt_in_capturing({ captureEventName: false });
+    } else {
+      posthog.opt_out_capturing();
+    }
   }
 }

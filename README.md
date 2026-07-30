@@ -37,6 +37,7 @@ A modern, type-safe analytics library for tracking user events across multiple p
 - [Import Structure](#import-structure)
 - [🚀 Quick Start](#-quick-start)
   - [Basic Usage](#basic-usage)
+  - [Consent-aware Capture](#consent-aware-capture)
   - [Global Instance Management](#global-instance-management)
   - [React Integration](#react-integration)
   - [SPM (Source Page Medium) Auto-Prefixing](#spm-source-page-medium-auto-prefixing)
@@ -190,6 +191,46 @@ await analytics.identify('user_123', {
   plan: 'pro',
 });
 ```
+
+### Consent-aware Capture
+
+Start opted out when analytics requires explicit user consent, then synchronize the user's choice:
+
+```typescript
+const analytics = createAnalytics({
+  business: 'my-app',
+  captureEnabled: false,
+  providers: {
+    posthog: {
+      enabled: true,
+      key: process.env.POSTHOG_KEY!,
+    },
+  },
+});
+
+await analytics.initialize();
+
+// No track, identify, or page-view calls are captured before this point.
+analytics.setCaptureEnabled(true);
+
+// Consent withdrawal stops capture immediately. Reset remains available for
+// clearing identity during logout.
+analytics.setCaptureEnabled(false);
+await analytics.reset();
+```
+
+For React, pass the current consent state to the provider. It is synchronized before provider
+initialization and whenever the value changes:
+
+```tsx
+<AnalyticsProvider captureEnabled={hasAnalyticsConsent} client={analytics}>
+  <App />
+</AnalyticsProvider>
+```
+
+The PostHog browser provider maps this state to `opt_in_capturing` and `opt_out_capturing`, so
+automatic capture and calls made through the native PostHog instance respect the same choice. GA4
+uses Google's `ga-disable-*` flag, and X Ads defers loading its pixel until capture is enabled.
 
 ### Global Instance Management
 
@@ -389,8 +430,9 @@ Main class for managing analytics providers.
 - `identify(userId: string, properties?): Promise<void>` - Identify user
 - `trackPageView(page: string, properties?): Promise<void>` - Track page view
 - `reset(): Promise<void>` - Reset user identity
+- `setCaptureEnabled(enabled: boolean): this` - Synchronize analytics consent
 - `setGlobalContext(context: EventContext): this` - Set global context
-- `getStatus(): { initialized: boolean; providersCount: number }` - Get status
+- `getStatus(): { captureEnabled: boolean; initialized: boolean; providersCount: number }` - Get status
 
 ### Global Instance Management
 
@@ -434,6 +476,7 @@ getGlobalAnalyticsNames(): string[]
 <AnalyticsProvider
   client={AnalyticsManager}
   autoInitialize?: boolean      // Default: true
+  captureEnabled?: boolean      // Synchronize capture consent before initialization
   registerGlobal?: boolean      // Default: true
   globalName?: string           // Default: '__default__'
 >

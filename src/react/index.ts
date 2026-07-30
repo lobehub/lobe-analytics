@@ -1,4 +1,5 @@
 // React Provider & Hooks
+export type { AnalyticsProviderProps } from './provider';
 export {
   AnalyticsProvider,
   useAnalytics,
