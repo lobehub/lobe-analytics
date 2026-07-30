@@ -11,6 +11,7 @@ import type { AnalyticsEvent, GoogleAnalyticsProviderConfig } from '@/types';
  */
 export class GoogleAnalyticsProvider extends BaseAnalytics {
   private readonly config: GoogleAnalyticsProviderConfig;
+  private initialPageViewSuppressed = false;
   private initialized = false;
 
   constructor(config: GoogleAnalyticsProviderConfig, business: string) {
@@ -62,6 +63,7 @@ export class GoogleAnalyticsProvider extends BaseAnalytics {
       // Initialize gtag
       gtag('js', new Date());
 
+      this.initialPageViewSuppressed = !this.isCaptureEnabled();
       this.configureGtag(gtag);
 
       this.initialized = true;
@@ -207,10 +209,16 @@ export class GoogleAnalyticsProvider extends BaseAnalytics {
     super.setCaptureEnabled(enabled);
     this.syncCaptureState();
 
-    if (enabled && previousCaptureEnabled === false && this.initialized) {
+    if (
+      enabled &&
+      previousCaptureEnabled === false &&
+      this.initialized &&
+      this.initialPageViewSuppressed
+    ) {
       const gtag = (window as any).gtag;
       if (gtag) {
         this.configureGtag(gtag);
+        this.initialPageViewSuppressed = false;
       }
     }
   }

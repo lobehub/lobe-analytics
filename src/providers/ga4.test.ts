@@ -47,4 +47,22 @@ describe('GoogleAnalyticsProvider', () => {
       getQueuedCommands().filter(([command, id]) => command === 'config' && id === measurementId),
     ).toHaveLength(2);
   });
+
+  it('does not send another automatic page view after capture resumes', async () => {
+    const provider = new GoogleAnalyticsProvider(
+      {
+        enabled: true,
+        measurementId,
+      },
+      'test',
+    );
+
+    await provider.initialize();
+    provider.setCaptureEnabled(false);
+    provider.setCaptureEnabled(true);
+
+    expect(
+      getQueuedCommands().filter(([command, id]) => command === 'config' && id === measurementId),
+    ).toHaveLength(1);
+  });
 });

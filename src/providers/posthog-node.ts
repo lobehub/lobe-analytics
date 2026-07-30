@@ -142,7 +142,10 @@ export class PostHogNodeAnalyticsProvider extends BaseAnalytics {
     }
 
     try {
-      const result = await this.client.isFeatureEnabled(flag, distinctId, groups);
+      const result = await this.client.isFeatureEnabled(flag, distinctId, {
+        groups,
+        sendFeatureFlagEvents: this.isCaptureEnabled(),
+      });
       return Boolean(result);
     } catch (error) {
       this.logError(`Failed to check feature flag: ${flag}`, error);
@@ -163,7 +166,10 @@ export class PostHogNodeAnalyticsProvider extends BaseAnalytics {
     }
 
     try {
-      return await this.client.getFeatureFlag(flag, distinctId, groups);
+      return await this.client.getFeatureFlag(flag, distinctId, {
+        groups,
+        sendFeatureFlagEvents: this.isCaptureEnabled(),
+      });
     } catch (error) {
       this.logError(`Failed to get feature flag: ${flag}`, error);
       return undefined;
