@@ -13,6 +13,11 @@ export default defineConfig({
   ],
   format: ['esm', 'cjs'],
   outDir: 'dist',
+  // Match the `exports` map in package.json: without `"type": "module"` tsup
+  // would emit the CJS build as `.js`, so `require` found no `.cjs` file.
+  // tsup does not apply this to declarations: they stay `.d.mts` (ESM) and
+  // `.d.ts` (CJS), and package.json points `require.types` at the `.d.ts`.
+  outExtension: ({ format }) => ({ js: format === 'cjs' ? '.cjs' : '.mjs' }),
   sourcemap: true,
   splitting: false,
 });
